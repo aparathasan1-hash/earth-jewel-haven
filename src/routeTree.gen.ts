@@ -9,38 +9,174 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VaultRouteImport } from './routes/vault'
+import { Route as StagesRouteImport } from './routes/stages'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StagesSupportRouteImport } from './routes/stages.support'
+import { Route as StagesRecoveryRouteImport } from './routes/stages.recovery'
+import { Route as StagesQuietRouteImport } from './routes/stages.quiet'
+import { Route as StagesNurseryRouteImport } from './routes/stages.nursery'
+import { Route as StagesMindRouteImport } from './routes/stages.mind'
+import { Route as StagesCrisisRouteImport } from './routes/stages.crisis'
 
+const VaultRoute = VaultRouteImport.update({
+  id: '/vault',
+  path: '/vault',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StagesRoute = StagesRouteImport.update({
+  id: '/stages',
+  path: '/stages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StagesSupportRoute = StagesSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => StagesRoute,
+} as any)
+const StagesRecoveryRoute = StagesRecoveryRouteImport.update({
+  id: '/recovery',
+  path: '/recovery',
+  getParentRoute: () => StagesRoute,
+} as any)
+const StagesQuietRoute = StagesQuietRouteImport.update({
+  id: '/quiet',
+  path: '/quiet',
+  getParentRoute: () => StagesRoute,
+} as any)
+const StagesNurseryRoute = StagesNurseryRouteImport.update({
+  id: '/nursery',
+  path: '/nursery',
+  getParentRoute: () => StagesRoute,
+} as any)
+const StagesMindRoute = StagesMindRouteImport.update({
+  id: '/mind',
+  path: '/mind',
+  getParentRoute: () => StagesRoute,
+} as any)
+const StagesCrisisRoute = StagesCrisisRouteImport.update({
+  id: '/crisis',
+  path: '/crisis',
+  getParentRoute: () => StagesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/privacy': typeof PrivacyRoute
+  '/stages': typeof StagesRouteWithChildren
+  '/vault': typeof VaultRoute
+  '/stages/crisis': typeof StagesCrisisRoute
+  '/stages/mind': typeof StagesMindRoute
+  '/stages/nursery': typeof StagesNurseryRoute
+  '/stages/quiet': typeof StagesQuietRoute
+  '/stages/recovery': typeof StagesRecoveryRoute
+  '/stages/support': typeof StagesSupportRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/privacy': typeof PrivacyRoute
+  '/stages': typeof StagesRouteWithChildren
+  '/vault': typeof VaultRoute
+  '/stages/crisis': typeof StagesCrisisRoute
+  '/stages/mind': typeof StagesMindRoute
+  '/stages/nursery': typeof StagesNurseryRoute
+  '/stages/quiet': typeof StagesQuietRoute
+  '/stages/recovery': typeof StagesRecoveryRoute
+  '/stages/support': typeof StagesSupportRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/privacy': typeof PrivacyRoute
+  '/stages': typeof StagesRouteWithChildren
+  '/vault': typeof VaultRoute
+  '/stages/crisis': typeof StagesCrisisRoute
+  '/stages/mind': typeof StagesMindRoute
+  '/stages/nursery': typeof StagesNurseryRoute
+  '/stages/quiet': typeof StagesQuietRoute
+  '/stages/recovery': typeof StagesRecoveryRoute
+  '/stages/support': typeof StagesSupportRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/privacy'
+    | '/stages'
+    | '/vault'
+    | '/stages/crisis'
+    | '/stages/mind'
+    | '/stages/nursery'
+    | '/stages/quiet'
+    | '/stages/recovery'
+    | '/stages/support'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/privacy'
+    | '/stages'
+    | '/vault'
+    | '/stages/crisis'
+    | '/stages/mind'
+    | '/stages/nursery'
+    | '/stages/quiet'
+    | '/stages/recovery'
+    | '/stages/support'
+  id:
+    | '__root__'
+    | '/'
+    | '/privacy'
+    | '/stages'
+    | '/vault'
+    | '/stages/crisis'
+    | '/stages/mind'
+    | '/stages/nursery'
+    | '/stages/quiet'
+    | '/stages/recovery'
+    | '/stages/support'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PrivacyRoute: typeof PrivacyRoute
+  StagesRoute: typeof StagesRouteWithChildren
+  VaultRoute: typeof VaultRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vault': {
+      id: '/vault'
+      path: '/vault'
+      fullPath: '/vault'
+      preLoaderRoute: typeof VaultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stages': {
+      id: '/stages'
+      path: '/stages'
+      fullPath: '/stages'
+      preLoaderRoute: typeof StagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +184,78 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/stages/support': {
+      id: '/stages/support'
+      path: '/support'
+      fullPath: '/stages/support'
+      preLoaderRoute: typeof StagesSupportRouteImport
+      parentRoute: typeof StagesRoute
+    }
+    '/stages/recovery': {
+      id: '/stages/recovery'
+      path: '/recovery'
+      fullPath: '/stages/recovery'
+      preLoaderRoute: typeof StagesRecoveryRouteImport
+      parentRoute: typeof StagesRoute
+    }
+    '/stages/quiet': {
+      id: '/stages/quiet'
+      path: '/quiet'
+      fullPath: '/stages/quiet'
+      preLoaderRoute: typeof StagesQuietRouteImport
+      parentRoute: typeof StagesRoute
+    }
+    '/stages/nursery': {
+      id: '/stages/nursery'
+      path: '/nursery'
+      fullPath: '/stages/nursery'
+      preLoaderRoute: typeof StagesNurseryRouteImport
+      parentRoute: typeof StagesRoute
+    }
+    '/stages/mind': {
+      id: '/stages/mind'
+      path: '/mind'
+      fullPath: '/stages/mind'
+      preLoaderRoute: typeof StagesMindRouteImport
+      parentRoute: typeof StagesRoute
+    }
+    '/stages/crisis': {
+      id: '/stages/crisis'
+      path: '/crisis'
+      fullPath: '/stages/crisis'
+      preLoaderRoute: typeof StagesCrisisRouteImport
+      parentRoute: typeof StagesRoute
+    }
   }
 }
 
+interface StagesRouteChildren {
+  StagesCrisisRoute: typeof StagesCrisisRoute
+  StagesMindRoute: typeof StagesMindRoute
+  StagesNurseryRoute: typeof StagesNurseryRoute
+  StagesQuietRoute: typeof StagesQuietRoute
+  StagesRecoveryRoute: typeof StagesRecoveryRoute
+  StagesSupportRoute: typeof StagesSupportRoute
+}
+
+const StagesRouteChildren: StagesRouteChildren = {
+  StagesCrisisRoute: StagesCrisisRoute,
+  StagesMindRoute: StagesMindRoute,
+  StagesNurseryRoute: StagesNurseryRoute,
+  StagesQuietRoute: StagesQuietRoute,
+  StagesRecoveryRoute: StagesRecoveryRoute,
+  StagesSupportRoute: StagesSupportRoute,
+}
+
+const StagesRouteWithChildren =
+  StagesRoute._addFileChildren(StagesRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PrivacyRoute: PrivacyRoute,
+  StagesRoute: StagesRouteWithChildren,
+  VaultRoute: VaultRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
