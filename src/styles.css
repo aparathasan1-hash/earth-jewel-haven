@@ -133,7 +133,10 @@
     min-height: 100dvh;
   }
 
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     font-family: var(--font-serif);
     font-weight: 400;
     letter-spacing: -0.015em;
@@ -157,33 +160,51 @@
   }
 }
 
-@utility deckle {
+.deckle {
   -webkit-mask-image: radial-gradient(circle at 1px 1px, #000 0.5px, transparent 1px);
   -webkit-mask-size: 6px 6px;
 }
 
-@utility prose-book {
-  & p {
-    margin-bottom: 1.1em;
-  }
-  & p:first-of-type::first-letter {
-    font-family: var(--font-serif);
-    float: left;
-    font-size: 3.6em;
-    line-height: 0.9;
-    padding: 0.05em 0.12em 0 0;
-    color: var(--color-accent);
-    font-weight: 500;
-  }
+.prose-book p {
+  margin-bottom: 1.1em;
+}
+.prose-book p:first-of-type::first-letter {
+  font-family: var(--font-serif);
+  float: left;
+  font-size: 3.6em;
+  line-height: 0.9;
+  padding: 0.05em 0.12em 0 0;
+  color: var(--color-accent);
+  font-weight: 500;
 }
 
 @keyframes breathe {
-  0%, 100% { transform: scale(0.6); opacity: 0.7; }
-  50% { transform: scale(1); opacity: 1; }
+  0%,
+  100% {
+    transform: scale(0.6);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.animate-fade-up { animation: fade-up 0.5s ease-out both; }
+.animate-fade-up {
+  animation: fade-up 0.5s ease-out both;
+}
+
+/* Smooth theme transition */
+html {
+  transition: background-color 0.3s ease;
+}

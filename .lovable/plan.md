@@ -1,4 +1,3 @@
-
 # The Villageless Mama — Build Plan
 
 A sensory, book-like digital sanctuary for postpartum mothers. Editorial typography, earthy jewel palette, paper grain texture, bottom-anchored thumb navigation, soothing dark mode default, and absolutely no popups (no modals, no toasts, no cookie banners — everything resolves inline).
@@ -6,6 +5,7 @@ A sensory, book-like digital sanctuary for postpartum mothers. Editorial typogra
 ## Design System (src/styles.css)
 
 **Palette (Earthy Jewels)** — oklch tokens for both modes; dark mode is the default (`<html class="dark">` set in root):
+
 - `--background` Oatmeal `#F5F2EB` (light) / deep ink `#1C1915` (dark)
 - `--foreground` River Stone / warm cream
 - `--primary` Deep Moss Green
@@ -46,18 +46,21 @@ A fixed bottom nav bar (`fixed bottom-0`) with 5 primary destinations: Home · V
 ## Core Features
 
 ### 1. Landing (`/`)
+
 - Editorial hero: serif headline, hand-drawn-feel SVG logomark placeholder.
 - Welcome essay (ethos) typeset like a book opening.
 - Inline cards linking to Substack and Pinterest (external links, open in new tab).
 - "Take a Guide" buy section — clicking a guide swaps the card inline into an embedded PDF viewer (`<iframe>` to a sample PDF in `src/assets/`) with a download button. No checkout modal; the simulated purchase is instant and inline.
 
 ### 2. The Vault (`/vault`)
+
 - Calm grid dashboard (bento-ish, paper cards with deckle-edge feel via SVG mask).
 - Categories: Essays, Printables, Audio, Courses (coming soon).
 - Persistent search input at top; filtering happens live against a typed `vaultItems` array. Searching "narcissistic family" filters across essays/printables/audio and shows a unified grid with type tags.
 - Results render inline below the search — never in a popup.
 
 ### 3. 4th Trimester Stages (`/stages`)
+
 - Overview shows 6 chapter cards. Each navigates to its own route.
 - **Recovery Room**: gentle physical-healing checklists, day-by-day notes.
 - **Nursery**: practical "rituals" cards (washing baby, fabric ritual, swaddle).
@@ -70,15 +73,18 @@ A fixed bottom nav bar (`fixed bottom-0`) with 5 primary destinations: Home · V
 - **Mother's Mind**: essay index + reader; each essay is a long-form route-rendered page with drop caps and pull quotes.
 
 ### 4. Privacy (`/privacy`)
+
 - "Zero Data Tracking" badge (SVG seal) prominently displayed.
 - Plain-language policy.
 - **Face ID / Secure Lock toggle**: when enabled (stored in `localStorage`), an inline lock screen renders over private routes (Mind, Crisis) requiring a tap-to-unlock gesture (simulated bio prompt — inline panel, not a modal). State managed via a small Zustand store.
 
 ## State Management
+
 - Zustand store: `theme`, `softerMode`, `secureLockEnabled`, `unlocked`, `audioState`.
 - TanStack Query already wired; not heavily needed (no backend) but used for any future fetch.
 
 ## Components to Build
+
 - `BottomNav`, `TopBar` (minimal)
 - `ThemeToggle`, `SofterToggle`
 - `GrainOverlay`
@@ -93,15 +99,18 @@ A fixed bottom nav bar (`fixed bottom-0`) with 5 primary destinations: Home · V
 - `EssayLayout` (drop cap, prose styles)
 
 ## Dependencies
+
 - Add: `framer-motion`, `zustand`, `lucide-react` (likely already present).
 
 ## Technical Notes
+
 - All interactive overlays are **inline panels**, not Radix Dialogs. No `sonner` toasts. Confirmation messages render as inline cards near the action.
 - Audio files: bundle 4 short royalty-free loops (~30–60s) in `src/assets/audio/` or use CC0 URLs from `cdn.pixabay.com` referenced directly.
 - Accessibility: `aria-label` on all icon buttons; `prefers-reduced-motion` respected by breathing pacer; min 44px tap targets; high-contrast tokens.
 - SEO: per-route `head()` metadata, single `<main>` in root, semantic headings.
 
 ## Out of Scope (this build)
+
 - Real auth, real payments, real backend (Lovable Cloud not enabled — request says "simulated").
 - Real Face ID API integration (simulated UI only).
 
