@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Fingerprint, Lock } from "lucide-react";
 import { useApp } from "@/lib/store";
+import { useT } from "@/lib/i18n";
 
 const HOLD_MS = 700;
 
@@ -11,6 +12,7 @@ export function SecureLockGate({
   children: ReactNode;
   label?: string;
 }) {
+  const t = useT();
   const { secureLock, unlocked, setUnlocked } = useApp();
   const [pressing, setPressing] = useState(false);
   const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

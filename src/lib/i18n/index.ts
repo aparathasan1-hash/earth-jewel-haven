@@ -1,6 +1,6 @@
 import { useCallback, useSyncExternalStore } from "react";
 
-export type Lang = "en" | "tr";
+export type Lang = "en" | "tr" | "es" | "fr" | "de";
 
 const STORAGE_KEY = "villa-lang";
 
@@ -9,7 +9,7 @@ let currentLang: Lang = "en";
 function getStoredLang(): Lang {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === "en" || stored === "tr") return stored;
+    if (stored === "en" || stored === "tr" || stored === "es" || stored === "fr" || stored === "de") return stored;
   } catch {}
   return "en";
 }

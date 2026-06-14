@@ -1,0 +1,22 @@
+{
+  "name": "The Villageless Mama",
+  "short_name": "Villageless",
+  "description": "A sensory, ad-free companion for postpartum mothers.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1c1915",
+  "theme_color": "#1c1915",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/Amblem.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/Amblem.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

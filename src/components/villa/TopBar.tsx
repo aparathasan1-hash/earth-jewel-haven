@@ -1,9 +1,10 @@
-import { Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { Sun, Moon, Droplet, Shield } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { Sun, Moon, Droplet, Shield, User, LogIn, LogOut, Settings, LayoutDashboard } from "lucide-react";
 import { useApp } from "@/lib/store";
 import { Logo } from "./Logo";
 import { useLang, setLang, type Lang } from "@/lib/i18n";
+import { getCurrentUser, signOut, getProfile, type Profile } from "@/lib/auth";
 
 const languages: { code: Lang; label: string }[] = [
   { code: "en", label: "EN" },
@@ -13,7 +14,28 @@ const languages: { code: Lang; label: string }[] = [
 export function TopBar() {
   const { theme, toggleTheme, softer, toggleSofter } = useApp();
   const lang = useLang();
+  const navigate = useNavigate();
   const [langOpen, setLangOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+
+  useEffect(() => {
+    getCurrentUser().then((u) => {
+      if (u) {
+        setUser(u);
+        getProfile(u.id).then(setProfile);
+      }
+    });
+  }, []);
+
+  async function handleSignOut() {
+    await signOut();
+    setUser(null);
+    setProfile(null);
+    setUserMenuOpen(false);
+    navigate({ to: "/" });
+  }
 
   return (
     <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur-lg">
@@ -70,6 +92,79 @@ export function TopBar() {
           >
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
+
+          {/* User menu */}
+          <div className="relative">
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              aria-label="User menu"
+              className="grid h-10 w-10 place-items-center rounded-full border border-border text-muted-foreground hover:text-foreground"
+            >
+              <User className="h-4 w-4" />
+            </button>
+            {userMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
+                <div className="absolute right-0 top-12 z-50 min-w-[180px] rounded-2xl border border-border bg-card p-2 shadow-xl">
+                  {user ? (
+                    <>
+                      <div className="border-b border-border px-3 py-2">
+                        <p className="text-sm font-medium">{profile?.full_name || user.email}</p>
+                        <p className="text-xs text-muted-foreground">@{profile?.username || "user"}</p>
+                      </div>
+                      <Link
+                        to="/auth/profile"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
+                      >
+                        <User className="h-4 w-4" /> Profile
+                      </Link>
+                      <Link
+                        to="/auth/community"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
+                      >
+                        <Settings className="h-4 w-4" /> Community
+                      </Link>
+                      {profile?.is_admin && (
+                        <Link
+                          to="/auth/admin"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
+                        >
+                          <LayoutDashboard className="h-4 w-4" /> Admin
+                        </Link>
+                      )}
+                      <button
+                        onClick={handleSignOut}
+                        className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+                      >
+                        <LogOut className="h-4 w-4" /> Sign Out
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        to="/auth/login"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
+                      >
+                        <LogIn className="h-4 w-4" /> Sign In
+                      </Link>
+                      <Link
+                        to="/auth/signup"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
+                      >
+                        <User className="h-4 w-4" /> Sign Up
+                      </Link>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+
           <Link
             to="/privacy"
             aria-label="Privacy"

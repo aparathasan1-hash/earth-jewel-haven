@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useApp, getTodayTotal } from "@/lib/store";
 import { useT } from "@/lib/i18n";
+import { getCurrentUser, saveBreathSession } from "@/lib/auth";
 
 type Phase = "inhale" | "hold" | "exhale";
 
@@ -130,14 +131,31 @@ export function BreathingPacer() {
 
   const overlayDuration = running ? current.secs : 0.6;
 
-  function saveSession() {
+  async function saveSession() {
     if (totalSeconds > 0) {
-      addBreathSession({
+      const session = {
         date: new Date().toISOString().split("T")[0],
         totalSeconds,
         cycles: cycleCount,
         pattern: t(pattern.labelKey),
-      });
+      };
+      // Save to localStorage (Zustand persist)
+      addBreathSession(session);
+      // Also save to Supabase if user is logged in
+      try {
+        const user = await getCurrentUser();
+        if (user) {
+          await saveBreathSession({
+            user_id: user.id,
+            date: session.date,
+            total_seconds: session.totalSeconds,
+            cycles: session.cycles,
+            pattern: session.pattern,
+          });
+        }
+      } catch {
+        // Silently fail - localStorage backup is sufficient
+      }
     }
   }
 
