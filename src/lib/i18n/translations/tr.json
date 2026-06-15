@@ -550,6 +550,25 @@
     "missing": "Lütfen tüm alanları doldur ve bir belge ekle.",
     "error": "Gönderilemedi. Lütfen tekrar dene."
   },
+  "baby": {
+    "growth": "Büyüme",
+    "weight": "Kilo",
+    "height": "Boy",
+    "head": "Baş",
+    "ageMonths": "Yaş (ay)",
+    "monthsShort": "ay",
+    "addMeasurement": "Ölçüm ekle",
+    "measureDate": "Tarih",
+    "measureMissing": "Bir tarih ve en az bir değer gir",
+    "measureAdded": "Ölçüm eklendi",
+    "measureDeleted": "Ölçüm silindi",
+    "measureDeleteConfirm": "Bu ölçümü sil?",
+    "measureError": "Ölçüm kaydedilemedi",
+    "noMeasurements": "Eğriyi görmek için bir ölçüm ekle.",
+    "noPercentileNoSex": "WHO persentil bantları için bebeğin cinsiyetini belirle.",
+    "percentileLabel": "Yaklaşık {p} persentilde 🌿",
+    "growthDisclaimer": "WHO referansı (0–24 ay). Bilgilendirme amaçlıdır, tıbbi tavsiye değildir."
+  },
   "assistant": {
     "title": "Yanında",
     "error": "Bir şeyler ters gitti, tekrar dener misin? 🌿",

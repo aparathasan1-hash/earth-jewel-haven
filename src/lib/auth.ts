@@ -585,6 +585,45 @@ export async function deleteMilestone(milestoneId: string) {
   if (error) throw error;
 }
 
+// --- Baby Measurements (Büyüme takibi, Faz 4A) ---
+
+export type BabyMeasurement = {
+  id: string;
+  baby_id: string;
+  date: string;
+  weight_kg: number | null;
+  height_cm: number | null;
+  head_circumference_cm: number | null;
+  note: string | null;
+  created_at: string;
+};
+
+export async function getBabyMeasurements(babyId: string): Promise<BabyMeasurement[]> {
+  const { data } = await supabase
+    .from("baby_measurements")
+    .select("*")
+    .eq("baby_id", babyId)
+    .order("date", { ascending: true });
+  return (data as BabyMeasurement[]) ?? [];
+}
+
+export async function saveBabyMeasurement(m: {
+  baby_id: string;
+  date: string;
+  weight_kg?: number | null;
+  height_cm?: number | null;
+  head_circumference_cm?: number | null;
+  note?: string | null;
+}) {
+  const { error } = await supabase.from("baby_measurements").insert(m);
+  if (error) throw error;
+}
+
+export async function deleteBabyMeasurement(measurementId: string) {
+  const { error } = await supabase.from("baby_measurements").delete().eq("id", measurementId);
+  if (error) throw error;
+}
+
 // --- Anniversary Badges ---
 
 export async function getAnniversaryBadges(): Promise<AnniversaryBadge[]> {

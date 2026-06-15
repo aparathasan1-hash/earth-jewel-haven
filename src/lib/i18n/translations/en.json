@@ -553,6 +553,25 @@
     "missing": "Please fill all fields and attach a document.",
     "error": "Could not submit. Please try again."
   },
+  "baby": {
+    "growth": "Growth",
+    "weight": "Weight",
+    "height": "Height",
+    "head": "Head",
+    "ageMonths": "Age (months)",
+    "monthsShort": "mo",
+    "addMeasurement": "Add measurement",
+    "measureDate": "Date",
+    "measureMissing": "Add a date and at least one value",
+    "measureAdded": "Measurement added",
+    "measureDeleted": "Measurement deleted",
+    "measureDeleteConfirm": "Delete this measurement?",
+    "measureError": "Could not save measurement",
+    "noMeasurements": "Add a measurement to see the curve.",
+    "noPercentileNoSex": "Set baby's sex to see WHO percentile bands.",
+    "percentileLabel": "Around the {p} percentile 🌿",
+    "growthDisclaimer": "WHO reference (0–24 mo). Informational only, not medical advice."
+  },
   "assistant": {
     "title": "Yanında",
     "error": "Something went wrong, want to try again? 🌿",
