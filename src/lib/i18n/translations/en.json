@@ -557,6 +557,20 @@
     "empty": "No one yet. Share your link to welcome the first mother.",
     "aMother": "A mother"
   },
+  "chat": {
+    "photo": "Photo",
+    "voice": "Voice message",
+    "video": "Video",
+    "recordingAudio": "Recording voice…",
+    "recordingVideo": "Recording video…",
+    "sendRecording": "Send",
+    "cancel": "Cancel",
+    "maxLen": "Up to 60 seconds.",
+    "permissionDenied": "Microphone/camera access was denied.",
+    "notImage": "Please choose an image.",
+    "tooLarge": "Image is too large (max 10MB).",
+    "uploadError": "Could not send media"
+  },
   "insights": {
     "title": "Your week",
     "subtitle": "A gentle look at the last 7 days. No judgment — just a mirror.",

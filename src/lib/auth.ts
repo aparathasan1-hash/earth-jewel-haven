@@ -39,11 +39,16 @@ export type Room = {
   profiles?: { username: string | null; full_name: string | null; avatar_url: string | null };
 };
 
+export type ChatMediaType = "image" | "audio" | "video";
+
 export type RoomMessage = {
   id: string;
   room_id: string;
   user_id: string;
-  content: string;
+  content: string | null;
+  media_url: string | null;
+  media_type: ChatMediaType | null;
+  media_duration: number | null;
   created_at: string;
   edited_at: string | null;
   profiles?: { username: string | null; full_name: string | null; avatar_url: string | null };
@@ -297,22 +302,54 @@ export async function getRoomMessages(roomId: string): Promise<RoomMessage[]> {
   return (data as RoomMessage[]) ?? [];
 }
 
-export async function sendMessage(roomId: string, userId: string, content: string) {
+export type ChatMedia = { url: string; type: ChatMediaType; duration?: number };
+
+export async function sendMessage(
+  roomId: string,
+  userId: string,
+  content: string,
+  media?: ChatMedia
+) {
+  const trimmed = content.trim();
   const { error } = await supabase.from("room_messages").insert({
     room_id: roomId,
     user_id: userId,
-    content,
+    content: trimmed || null,
+    media_url: media?.url ?? null,
+    media_type: media?.type ?? null,
+    media_duration: media?.duration ?? null,
   });
   if (error) throw error;
-  // Oda katılımcılarına push (best-effort)
+  // Oda katılımcılarına push (best-effort). Medya için kısa etiket.
+  const mediaLabel: Record<ChatMediaType, string> = {
+    image: "📷 Fotoğraf",
+    audio: "🎤 Sesli mesaj",
+    video: "🎬 Video",
+  };
+  const preview = (trimmed || (media ? mediaLabel[media.type] : "")).slice(0, 120);
   try {
     const { notifyRoomMessage } = await import("./api/push.functions");
-    await notifyRoomMessage({
-      data: { roomId, senderId: userId, preview: content.slice(0, 120) },
-    });
+    await notifyRoomMessage({ data: { roomId, senderId: userId, preview } });
   } catch (e) {
     console.warn("notifyRoomMessage başarısız:", e);
   }
+}
+
+// Sohbet medyası yükle (public chat_media bucket, {uid}/ klasörü). Public URL döner.
+export async function uploadChatMedia(
+  userId: string,
+  file: Blob,
+  type: ChatMediaType,
+  ext: string
+): Promise<string> {
+  const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const filePath = `${userId}/${type}/${fileName}`;
+  const { error: uploadError } = await supabase.storage
+    .from("chat_media")
+    .upload(filePath, file, { cacheControl: "3600", upsert: false, contentType: file.type || undefined });
+  if (uploadError) throw uploadError;
+  const { data } = supabase.storage.from("chat_media").getPublicUrl(filePath);
+  return data.publicUrl;
 }
 
 export async function editMessage(messageId: string, userId: string, newContent: string) {

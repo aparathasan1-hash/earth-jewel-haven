@@ -554,6 +554,20 @@
     "empty": "Henüz kimse yok. Linkini paylaş, ilk anneyi karşıla.",
     "aMother": "Bir anne"
   },
+  "chat": {
+    "photo": "Fotoğraf",
+    "voice": "Sesli mesaj",
+    "video": "Video",
+    "recordingAudio": "Ses kaydediliyor…",
+    "recordingVideo": "Video kaydediliyor…",
+    "sendRecording": "Gönder",
+    "cancel": "İptal",
+    "maxLen": "En fazla 60 saniye.",
+    "permissionDenied": "Mikrofon/kamera erişimi reddedildi.",
+    "notImage": "Lütfen bir resim seç.",
+    "tooLarge": "Resim çok büyük (en fazla 10MB).",
+    "uploadError": "Medya gönderilemedi"
+  },
   "insights": {
     "title": "Haftan",
     "subtitle": "Son 7 güne nazik bir bakış. Yargı yok — yalnızca bir ayna.",

@@ -12,10 +12,12 @@ import {
   editMessage,
   deleteMessage,
   getRoomDetails,
+  uploadChatMedia,
   type Room,
   type RoomMessage,
   type RoomDetailedInfo,
 } from "@/lib/auth";
+import { ChatMediaBar, type RecordedMedia } from "@/components/villa/ChatMediaBar";
 
 export const Route = createFileRoute("/auth/community")({
   head: () => ({
@@ -45,6 +47,7 @@ function CommunityPage() {
   const [isEditLoading, setIsEditLoading] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
+  const [mediaUploading, setMediaUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -162,6 +165,26 @@ function CommunityPage() {
     } catch (err) {
       console.error("Error sending message:", err);
       toast.error(t("common.error") || "Error sending message");
+    }
+  }
+
+  async function handleSendMedia(m: RecordedMedia) {
+    if (!userId || !activeRoom) return;
+    setMediaUploading(true);
+    try {
+      const url = await uploadChatMedia(userId, m.blob, m.type, m.ext);
+      await sendMessage(activeRoom.id, userId, "", {
+        url,
+        type: m.type,
+        duration: m.duration,
+      });
+      const updated = await getRoomMessages(activeRoom.id);
+      setMessages(updated);
+    } catch (err) {
+      console.error("Error sending media:", err);
+      toast.error(t("chat.uploadError") || "Could not send media");
+    } finally {
+      setMediaUploading(false);
     }
   }
 
@@ -359,7 +382,29 @@ function CommunityPage() {
                             >
                               {msg.profiles?.full_name || msg.profiles?.username || "Anonymous"}
                             </Link>
-                            <p className="mt-0.5 text-sm break-words">{msg.content}</p>
+                            {msg.media_url && msg.media_type === "image" && (
+                              <a href={msg.media_url} target="_blank" rel="noopener noreferrer">
+                                <img
+                                  src={msg.media_url}
+                                  alt=""
+                                  className="mt-1 max-h-64 w-full rounded-xl object-cover"
+                                />
+                              </a>
+                            )}
+                            {msg.media_url && msg.media_type === "audio" && (
+                              <audio controls src={msg.media_url} className="mt-1 w-56 max-w-full" />
+                            )}
+                            {msg.media_url && msg.media_type === "video" && (
+                              <video
+                                controls
+                                playsInline
+                                src={msg.media_url}
+                                className="mt-1 max-h-72 w-full rounded-xl bg-black"
+                              />
+                            )}
+                            {msg.content && (
+                              <p className="mt-0.5 text-sm break-words">{msg.content}</p>
+                            )}
                             {msg.edited_at && (
                               <p className="text-xs opacity-70 mt-1">edited</p>
                             )}
@@ -372,7 +417,7 @@ function CommunityPage() {
                             <button
                               onClick={() => {
                                 setEditingMessageId(msg.id);
-                                setEditingContent(msg.content);
+                                setEditingContent(msg.content ?? "");
                               }}
                               className="p-1 rounded-lg hover:bg-secondary/40 transition-colors"
                               title="Edit message"
@@ -417,17 +462,18 @@ function CommunityPage() {
               </div>
 
               <div className="mt-3 flex gap-2">
+                <ChatMediaBar busy={mediaUploading} onSend={handleSendMedia} />
                 <input
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSend()}
                   placeholder={t("auth.messagePlaceholder")}
-                  className="flex-1 rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-accent"
+                  className="min-w-0 flex-1 rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-accent"
                 />
                 <button
                   onClick={handleSend}
-                  className="grid h-12 w-12 place-items-center rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                  className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
                 >
                   <Send className="h-5 w-5" />
                 </button>
