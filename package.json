@@ -14,6 +14,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",
     "@hookform/resolvers": "^5.4.0",
+    "@livekit/components-react": "^2.9.21",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-aspect-ratio": "^1.1.8",
@@ -55,6 +56,8 @@
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.40.0",
     "input-otp": "^1.4.2",
+    "livekit-client": "^2.19.2",
+    "livekit-server-sdk": "^2.15.4",
     "lucide-react": "^0.575.0",
     "react": "^19.2.0",
     "react-day-picker": "^9.14.0",

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Shield, Users, Award, Crown, Star, BookOpen, Plus, Pencil, Trash2, X, Check } from "lucide-react";
+import { ArrowLeft, Shield, Users, Award, Crown, Star, BookOpen, Plus, Pencil, Trash2, X, Check, ShieldCheck, BadgeCheck, ExternalLink } from "lucide-react";
+import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import {
   getCurrentUser,
@@ -13,9 +14,14 @@ import {
   createVaultItem,
   updateVaultItem,
   deleteVaultItem,
+  getExpertApplications,
+  getExpertDocUrl,
+  approveExpertApplication,
+  rejectExpertApplication,
   type Profile,
   type Badge,
   type VaultItemDB,
+  type ExpertApplication,
 } from "@/lib/auth";
 
 export const Route = createFileRoute("/auth/admin")({
@@ -28,13 +34,14 @@ export const Route = createFileRoute("/auth/admin")({
   component: AdminPage,
 });
 
-type Tab = "users" | "badges" | "vault";
+type Tab = "users" | "badges" | "vault" | "experts";
 
 function AdminPage() {
   const t = useT();
   const [users, setUsers] = useState<Profile[]>([]);
   const [badges, setBadges] = useState<Badge[]>([]);
   const [vaultItems, setVaultItems] = useState<VaultItemDB[]>([]);
+  const [expertApps, setExpertApps] = useState<ExpertApplication[]>([]);
   const [tab, setTab] = useState<Tab>("users");
   const [isAdmin, setIsAdmin] = useState(false);
   const [showVaultForm, setShowVaultForm] = useState(false);
@@ -63,10 +70,49 @@ function AdminPage() {
   }, []);
 
   async function loadData() {
-    const [u, b, v] = await Promise.all([getAllUsers(), getAllBadges(), getVaultItems()]);
+    const [u, b, v, e] = await Promise.all([
+      getAllUsers(),
+      getAllBadges(),
+      getVaultItems(),
+      getExpertApplications(),
+    ]);
     setUsers(u);
     setBadges(b);
     setVaultItems(v);
+    setExpertApps(e);
+  }
+
+  async function handleViewExpertDoc(path: string) {
+    try {
+      const url = await getExpertDocUrl(path);
+      if (url) window.open(url, "_blank", "noopener");
+    } catch (e) {
+      console.error(e);
+      toast.error("Belge açılamadı");
+    }
+  }
+
+  async function handleApproveExpert(appId: string) {
+    try {
+      await approveExpertApplication(appId);
+      toast.success("Uzman onaylandı 🌿");
+      loadData();
+    } catch (e) {
+      console.error(e);
+      toast.error("Onaylanamadı");
+    }
+  }
+
+  async function handleRejectExpert(appId: string) {
+    const note = prompt("Red gerekçesi (opsiyonel):") ?? undefined;
+    try {
+      await rejectExpertApplication(appId, note);
+      toast.success("Başvuru reddedildi");
+      loadData();
+    } catch (e) {
+      console.error(e);
+      toast.error("Reddedilemedi");
+    }
   }
 
   async function handleAwardBadge(userId: string, badgeId: string) {
@@ -207,6 +253,21 @@ function AdminPage() {
           }`}
         >
           <BookOpen className="h-4 w-4" /> Vault
+        </button>
+        <button
+          onClick={() => setTab("experts")}
+          className={`flex items-center gap-2 rounded-xl px-5 py-3 text-sm transition-colors ${
+            tab === "experts"
+              ? "bg-primary text-primary-foreground"
+              : "border border-border bg-card text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <ShieldCheck className="h-4 w-4" /> Experts
+          {expertApps.some((a) => a.status === "pending") && (
+            <span className="ml-1 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-[10px] text-accent-foreground">
+              {expertApps.filter((a) => a.status === "pending").length}
+            </span>
+          )}
         </button>
       </div>
 
@@ -432,6 +493,70 @@ function AdminPage() {
               <p className="text-center text-sm text-muted-foreground">No vault items yet. Add one above!</p>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Experts Tab */}
+      {tab === "experts" && (
+        <div className="mt-4 space-y-3">
+          {expertApps.length === 0 && (
+            <p className="text-center text-sm text-muted-foreground">Henüz uzman başvurusu yok.</p>
+          )}
+          {expertApps.map((a) => (
+            <div key={a.id} className="rounded-xl border border-border bg-card p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="flex items-center gap-1.5 font-medium">
+                    {a.full_name}
+                    {a.status === "approved" && <BadgeCheck className="h-4 w-4 text-accent" />}
+                  </p>
+                  <p className="text-sm text-muted-foreground">{a.profession}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    @{a.profiles?.username || "user"} ·{" "}
+                    {new Date(a.created_at).toLocaleDateString()}
+                  </p>
+                  <span
+                    className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                      a.status === "pending"
+                        ? "bg-amber-500/15 text-amber-500"
+                        : a.status === "approved"
+                          ? "bg-accent/15 text-accent"
+                          : "bg-destructive/15 text-destructive"
+                    }`}
+                  >
+                    {a.status}
+                  </span>
+                  {a.review_note && (
+                    <p className="mt-1 text-[11px] text-muted-foreground">Not: {a.review_note}</p>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => handleViewExpertDoc(a.document_path)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs hover:text-accent"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" /> Belge
+                  </button>
+                  {a.status !== "approved" && (
+                    <button
+                      onClick={() => handleApproveExpert(a.id)}
+                      className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs text-primary-foreground"
+                    >
+                      <Check className="h-3.5 w-3.5" /> Onayla
+                    </button>
+                  )}
+                  {a.status !== "rejected" && (
+                    <button
+                      onClick={() => handleRejectExpert(a.id)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-destructive/40 px-3 py-1.5 text-xs text-destructive"
+                    >
+                      <X className="h-3.5 w-3.5" /> Reddet
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

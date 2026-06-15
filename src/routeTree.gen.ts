@@ -26,8 +26,11 @@ import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-passw
 import { Route as AuthProfileRouteImport } from './routes/auth.profile'
 import { Route as AuthOnboardingRouteImport } from './routes/auth.onboarding'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
+import { Route as AuthLiveRouteImport } from './routes/auth.live'
+import { Route as AuthGoliveRouteImport } from './routes/auth.golive'
 import { Route as AuthFriendsRouteImport } from './routes/auth.friends'
 import { Route as AuthFeedRouteImport } from './routes/auth.feed'
+import { Route as AuthExpertRouteImport } from './routes/auth.expert'
 import { Route as AuthEditProfileRouteImport } from './routes/auth.edit-profile'
 import { Route as AuthDiscoverRouteImport } from './routes/auth.discover'
 import { Route as AuthCommunityRouteImport } from './routes/auth.community'
@@ -35,6 +38,7 @@ import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AuthBabyAddRouteImport } from './routes/auth.baby-add'
 import { Route as AuthAssistantRouteImport } from './routes/auth.assistant'
 import { Route as AuthAdminRouteImport } from './routes/auth.admin'
+import { Route as AuthWatchStreamIdRouteImport } from './routes/auth.watch.$streamId'
 import { Route as AuthUserUserIdRouteImport } from './routes/auth.user.$userId'
 import { Route as AuthBabyIdRouteImport } from './routes/auth.baby.$id'
 
@@ -123,6 +127,16 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthLiveRoute = AuthLiveRouteImport.update({
+  id: '/auth/live',
+  path: '/auth/live',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthGoliveRoute = AuthGoliveRouteImport.update({
+  id: '/auth/golive',
+  path: '/auth/golive',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthFriendsRoute = AuthFriendsRouteImport.update({
   id: '/auth/friends',
   path: '/auth/friends',
@@ -131,6 +145,11 @@ const AuthFriendsRoute = AuthFriendsRouteImport.update({
 const AuthFeedRoute = AuthFeedRouteImport.update({
   id: '/auth/feed',
   path: '/auth/feed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthExpertRoute = AuthExpertRouteImport.update({
+  id: '/auth/expert',
+  path: '/auth/expert',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthEditProfileRoute = AuthEditProfileRouteImport.update({
@@ -168,6 +187,11 @@ const AuthAdminRoute = AuthAdminRouteImport.update({
   path: '/auth/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthWatchStreamIdRoute = AuthWatchStreamIdRouteImport.update({
+  id: '/auth/watch/$streamId',
+  path: '/auth/watch/$streamId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthUserUserIdRoute = AuthUserUserIdRouteImport.update({
   id: '/auth/user/$userId',
   path: '/auth/user/$userId',
@@ -191,8 +215,11 @@ export interface FileRoutesByFullPath {
   '/auth/community': typeof AuthCommunityRoute
   '/auth/discover': typeof AuthDiscoverRoute
   '/auth/edit-profile': typeof AuthEditProfileRoute
+  '/auth/expert': typeof AuthExpertRoute
   '/auth/feed': typeof AuthFeedRoute
   '/auth/friends': typeof AuthFriendsRoute
+  '/auth/golive': typeof AuthGoliveRoute
+  '/auth/live': typeof AuthLiveRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/onboarding': typeof AuthOnboardingRoute
   '/auth/profile': typeof AuthProfileRoute
@@ -208,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/stages/support': typeof StagesSupportRoute
   '/auth/baby/$id': typeof AuthBabyIdRoute
   '/auth/user/$userId': typeof AuthUserUserIdRoute
+  '/auth/watch/$streamId': typeof AuthWatchStreamIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -221,8 +249,11 @@ export interface FileRoutesByTo {
   '/auth/community': typeof AuthCommunityRoute
   '/auth/discover': typeof AuthDiscoverRoute
   '/auth/edit-profile': typeof AuthEditProfileRoute
+  '/auth/expert': typeof AuthExpertRoute
   '/auth/feed': typeof AuthFeedRoute
   '/auth/friends': typeof AuthFriendsRoute
+  '/auth/golive': typeof AuthGoliveRoute
+  '/auth/live': typeof AuthLiveRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/onboarding': typeof AuthOnboardingRoute
   '/auth/profile': typeof AuthProfileRoute
@@ -238,6 +269,7 @@ export interface FileRoutesByTo {
   '/stages/support': typeof StagesSupportRoute
   '/auth/baby/$id': typeof AuthBabyIdRoute
   '/auth/user/$userId': typeof AuthUserUserIdRoute
+  '/auth/watch/$streamId': typeof AuthWatchStreamIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -252,8 +284,11 @@ export interface FileRoutesById {
   '/auth/community': typeof AuthCommunityRoute
   '/auth/discover': typeof AuthDiscoverRoute
   '/auth/edit-profile': typeof AuthEditProfileRoute
+  '/auth/expert': typeof AuthExpertRoute
   '/auth/feed': typeof AuthFeedRoute
   '/auth/friends': typeof AuthFriendsRoute
+  '/auth/golive': typeof AuthGoliveRoute
+  '/auth/live': typeof AuthLiveRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/onboarding': typeof AuthOnboardingRoute
   '/auth/profile': typeof AuthProfileRoute
@@ -269,6 +304,7 @@ export interface FileRoutesById {
   '/stages/support': typeof StagesSupportRoute
   '/auth/baby/$id': typeof AuthBabyIdRoute
   '/auth/user/$userId': typeof AuthUserUserIdRoute
+  '/auth/watch/$streamId': typeof AuthWatchStreamIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -284,8 +320,11 @@ export interface FileRouteTypes {
     | '/auth/community'
     | '/auth/discover'
     | '/auth/edit-profile'
+    | '/auth/expert'
     | '/auth/feed'
     | '/auth/friends'
+    | '/auth/golive'
+    | '/auth/live'
     | '/auth/login'
     | '/auth/onboarding'
     | '/auth/profile'
@@ -301,6 +340,7 @@ export interface FileRouteTypes {
     | '/stages/support'
     | '/auth/baby/$id'
     | '/auth/user/$userId'
+    | '/auth/watch/$streamId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -314,8 +354,11 @@ export interface FileRouteTypes {
     | '/auth/community'
     | '/auth/discover'
     | '/auth/edit-profile'
+    | '/auth/expert'
     | '/auth/feed'
     | '/auth/friends'
+    | '/auth/golive'
+    | '/auth/live'
     | '/auth/login'
     | '/auth/onboarding'
     | '/auth/profile'
@@ -331,6 +374,7 @@ export interface FileRouteTypes {
     | '/stages/support'
     | '/auth/baby/$id'
     | '/auth/user/$userId'
+    | '/auth/watch/$streamId'
   id:
     | '__root__'
     | '/'
@@ -344,8 +388,11 @@ export interface FileRouteTypes {
     | '/auth/community'
     | '/auth/discover'
     | '/auth/edit-profile'
+    | '/auth/expert'
     | '/auth/feed'
     | '/auth/friends'
+    | '/auth/golive'
+    | '/auth/live'
     | '/auth/login'
     | '/auth/onboarding'
     | '/auth/profile'
@@ -361,6 +408,7 @@ export interface FileRouteTypes {
     | '/stages/support'
     | '/auth/baby/$id'
     | '/auth/user/$userId'
+    | '/auth/watch/$streamId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -375,8 +423,11 @@ export interface RootRouteChildren {
   AuthCommunityRoute: typeof AuthCommunityRoute
   AuthDiscoverRoute: typeof AuthDiscoverRoute
   AuthEditProfileRoute: typeof AuthEditProfileRoute
+  AuthExpertRoute: typeof AuthExpertRoute
   AuthFeedRoute: typeof AuthFeedRoute
   AuthFriendsRoute: typeof AuthFriendsRoute
+  AuthGoliveRoute: typeof AuthGoliveRoute
+  AuthLiveRoute: typeof AuthLiveRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthOnboardingRoute: typeof AuthOnboardingRoute
   AuthProfileRoute: typeof AuthProfileRoute
@@ -386,6 +437,7 @@ export interface RootRouteChildren {
   AuthUpdatePasswordRoute: typeof AuthUpdatePasswordRoute
   AuthBabyIdRoute: typeof AuthBabyIdRoute
   AuthUserUserIdRoute: typeof AuthUserUserIdRoute
+  AuthWatchStreamIdRoute: typeof AuthWatchStreamIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -509,6 +561,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/live': {
+      id: '/auth/live'
+      path: '/auth/live'
+      fullPath: '/auth/live'
+      preLoaderRoute: typeof AuthLiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/golive': {
+      id: '/auth/golive'
+      path: '/auth/golive'
+      fullPath: '/auth/golive'
+      preLoaderRoute: typeof AuthGoliveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/friends': {
       id: '/auth/friends'
       path: '/auth/friends'
@@ -521,6 +587,13 @@ declare module '@tanstack/react-router' {
       path: '/auth/feed'
       fullPath: '/auth/feed'
       preLoaderRoute: typeof AuthFeedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/expert': {
+      id: '/auth/expert'
+      path: '/auth/expert'
+      fullPath: '/auth/expert'
+      preLoaderRoute: typeof AuthExpertRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/edit-profile': {
@@ -570,6 +643,13 @@ declare module '@tanstack/react-router' {
       path: '/auth/admin'
       fullPath: '/auth/admin'
       preLoaderRoute: typeof AuthAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/watch/$streamId': {
+      id: '/auth/watch/$streamId'
+      path: '/auth/watch/$streamId'
+      fullPath: '/auth/watch/$streamId'
+      preLoaderRoute: typeof AuthWatchStreamIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/user/$userId': {
@@ -622,8 +702,11 @@ const rootRouteChildren: RootRouteChildren = {
   AuthCommunityRoute: AuthCommunityRoute,
   AuthDiscoverRoute: AuthDiscoverRoute,
   AuthEditProfileRoute: AuthEditProfileRoute,
+  AuthExpertRoute: AuthExpertRoute,
   AuthFeedRoute: AuthFeedRoute,
   AuthFriendsRoute: AuthFriendsRoute,
+  AuthGoliveRoute: AuthGoliveRoute,
+  AuthLiveRoute: AuthLiveRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthOnboardingRoute: AuthOnboardingRoute,
   AuthProfileRoute: AuthProfileRoute,
@@ -633,6 +716,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthUpdatePasswordRoute: AuthUpdatePasswordRoute,
   AuthBabyIdRoute: AuthBabyIdRoute,
   AuthUserUserIdRoute: AuthUserUserIdRoute,
+  AuthWatchStreamIdRoute: AuthWatchStreamIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

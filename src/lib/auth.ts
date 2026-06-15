@@ -11,6 +11,8 @@ export type Profile = {
   baby_name: string | null;
   baby_birth_date: string | null;
   is_admin: boolean;
+  is_verified_expert?: boolean;
+  expert_title?: string | null;
   created_at: string;
 };
 
@@ -840,6 +842,207 @@ export async function discoverProfiles(
   });
   if (error) throw error;
   return (data as DiscoverProfile[]) ?? [];
+}
+
+// --- Canlı Yayın (Live Streaming L1) ---
+
+export type LiveStream = {
+  id: string;
+  host_id: string;
+  title: string;
+  status: "live" | "ended";
+  viewer_count: number;
+  is_private: boolean;
+  ended_reason: string | null;
+  started_at: string;
+  ended_at: string | null;
+  profiles?: {
+    username: string | null;
+    full_name: string | null;
+    avatar_url: string | null;
+    is_verified_expert?: boolean;
+    expert_title?: string | null;
+  };
+};
+
+const streamHostSelect =
+  "*, profiles!live_streams_host_id_fkey(username, full_name, avatar_url, is_verified_expert, expert_title)";
+
+// Yayın başlat → oluşturulan yayın kaydını döndür (oda adı = id)
+export async function startStream(
+  hostId: string,
+  title: string,
+  isPrivate = false
+): Promise<LiveStream> {
+  const { data, error } = await supabase
+    .from("live_streams")
+    .insert({ host_id: hostId, title, is_private: isPrivate, status: "live" })
+    .select(streamHostSelect)
+    .single();
+  if (error) throw error;
+  return data as LiveStream;
+}
+
+// Yayını bitir (sahibi: 'host'; admin kill-switch: 'admin')
+export async function endStream(streamId: string, reason: "host" | "admin" = "host") {
+  const { error } = await supabase
+    .from("live_streams")
+    .update({ status: "ended", ended_at: new Date().toISOString(), ended_reason: reason })
+    .eq("id", streamId);
+  if (error) throw error;
+}
+
+// Aktif (canlı + public) yayınlar — keşif
+export async function getLiveStreams(): Promise<LiveStream[]> {
+  const { data } = await supabase
+    .from("live_streams")
+    .select(streamHostSelect)
+    .eq("status", "live")
+    .eq("is_private", false)
+    .order("started_at", { ascending: false });
+  return (data as LiveStream[]) ?? [];
+}
+
+export async function getStream(streamId: string): Promise<LiveStream | null> {
+  const { data } = await supabase
+    .from("live_streams")
+    .select(streamHostSelect)
+    .eq("id", streamId)
+    .maybeSingle();
+  return (data as LiveStream) ?? null;
+}
+
+export async function updateViewerCount(streamId: string, count: number) {
+  await supabase.from("live_streams").update({ viewer_count: count }).eq("id", streamId);
+}
+
+// --- Yayın içi sohbet ---
+export type StreamMessage = {
+  id: string;
+  stream_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  profiles?: { username: string | null; full_name: string | null; avatar_url: string | null };
+};
+
+export async function getStreamMessages(streamId: string): Promise<StreamMessage[]> {
+  const { data } = await supabase
+    .from("stream_messages")
+    .select("*, profiles(username, full_name, avatar_url)")
+    .eq("stream_id", streamId)
+    .order("created_at", { ascending: true })
+    .limit(200);
+  return (data as StreamMessage[]) ?? [];
+}
+
+export async function sendStreamMessage(streamId: string, userId: string, content: string) {
+  const { error } = await supabase
+    .from("stream_messages")
+    .insert({ stream_id: streamId, user_id: userId, content });
+  if (error) throw error;
+}
+
+// İzleyici bildirimi (moderasyon)
+export async function reportStream(streamId: string, reporterId: string, reason: string) {
+  const { error } = await supabase
+    .from("stream_reports")
+    .upsert(
+      { stream_id: streamId, reporter_id: reporterId, reason },
+      { onConflict: "stream_id,reporter_id" }
+    );
+  if (error) throw error;
+}
+
+// --- Uzman Doğrulama (Live L2) ---
+
+export type ExpertApplication = {
+  id: string;
+  user_id: string;
+  full_name: string;
+  profession: string;
+  expert_title: string | null;
+  document_path: string;
+  status: "pending" | "approved" | "rejected";
+  review_note: string | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  profiles?: { username: string | null; full_name: string | null; avatar_url: string | null };
+};
+
+// Başvuru gönder: belgeyi özel bucket'a yükle + kayıt oluştur
+export async function submitExpertApplication(
+  userId: string,
+  fields: { fullName: string; profession: string; expertTitle?: string },
+  file: File
+): Promise<void> {
+  const ext = file.name.split(".").pop();
+  const path = `${userId}/${Date.now()}.${ext}`;
+  const { error: upErr } = await supabase.storage
+    .from("expert_docs")
+    .upload(path, file, { upsert: true });
+  if (upErr) throw upErr;
+
+  // Önceki başvuruyu (varsa) temizle → tek aktif başvuru
+  await supabase.from("expert_applications").delete().eq("user_id", userId);
+
+  const { error } = await supabase.from("expert_applications").insert({
+    user_id: userId,
+    full_name: fields.fullName,
+    profession: fields.profession,
+    expert_title: fields.expertTitle ?? null,
+    document_path: path,
+  });
+  if (error) throw error;
+}
+
+export async function getMyExpertApplication(userId: string): Promise<ExpertApplication | null> {
+  const { data } = await supabase
+    .from("expert_applications")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle();
+  return (data as ExpertApplication) ?? null;
+}
+
+// Admin: tüm başvurular (başvuran profili ile)
+export async function getExpertApplications(): Promise<ExpertApplication[]> {
+  const { data } = await supabase
+    .from("expert_applications")
+    .select("*, profiles!expert_applications_user_id_fkey(username, full_name, avatar_url)")
+    .order("created_at", { ascending: false });
+  return (data as ExpertApplication[]) ?? [];
+}
+
+// Admin: belgeyi görüntülemek için imzalı URL (özel bucket)
+export async function getExpertDocUrl(path: string): Promise<string | null> {
+  const { data } = await supabase.storage.from("expert_docs").createSignedUrl(path, 300);
+  return data?.signedUrl ?? null;
+}
+
+// Admin: onayla (SECURITY DEFINER fn → profiles.is_verified_expert=true)
+export async function approveExpertApplication(appId: string, note?: string) {
+  const { error } = await supabase.rpc("approve_expert_application", {
+    p_app_id: appId,
+    p_note: note ?? null,
+  });
+  if (error) throw error;
+}
+
+// Admin: reddet
+export async function rejectExpertApplication(appId: string, note?: string) {
+  const user = await getCurrentUser();
+  const { error } = await supabase
+    .from("expert_applications")
+    .update({
+      status: "rejected",
+      review_note: note ?? null,
+      reviewed_by: user?.id ?? null,
+      reviewed_at: new Date().toISOString(),
+    })
+    .eq("id", appId);
+  if (error) throw error;
 }
 
 // --- Birth Club (doğum-ayı kohort grupları, Faz 2.4) ---

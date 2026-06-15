@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { Sun, Moon, Droplet, Shield, User, LogIn, LogOut, Settings, LayoutDashboard, Newspaper, Users, Sparkles, Compass } from "lucide-react";
+import { Sun, Moon, Droplet, Shield, User, LogIn, LogOut, Settings, LayoutDashboard, Newspaper, Users, Sparkles, Compass, Radio } from "lucide-react";
 import { useApp } from "@/lib/store";
 import { Logo } from "./Logo";
 import { useLang, setLang, useT, type Lang } from "@/lib/i18n";
@@ -170,6 +170,13 @@ export function TopBar() {
                         className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
                       >
                         <Compass className="h-4 w-4" /> {t("nav.discover") || "Discover"}
+                      </Link>
+                      <Link
+                        to="/auth/live"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
+                      >
+                        <Radio className="h-4 w-4" /> {t("nav.live") || "Live"}
                       </Link>
                       <Link
                         to="/auth/community"
