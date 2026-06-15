@@ -339,7 +339,8 @@
     "updatePassword": "Passwort aktualisieren",
     "updatePasswordDesc": "Gib dein neues Passwort ein.",
     "passwordTooShort": "Das Passwort muss mindestens 6 Zeichen lang sein",
-    "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein"
+    "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein",
+    "settings": "Einstellungen"
   },
   "error": {
     "notFoundTitle": "Ein Weg, der nirgendwo hinführt",
@@ -355,6 +356,28 @@
     "turkish": "Türkçe",
     "spanish": "Español",
     "french": "Français",
-    "german": "Deutsch"
+    "german": "Deutsch",
+    "howAreYouFeeling": "Wie fühlst du dich heute?",
+    "addNote": "Notiz hinzufügen (optional)",
+    "notePlaceholder": "Woran denkst du?",
+    "selectMood": "Bitte wähle eine Stimmung",
+    "moodSaved": "Stimmung gespeichert! 💫",
+    "saving": "Speichern",
+    "cancel": "Abbrechen",
+    "error": "Etwas ist schief gelaufen",
+    "deleted": "Gelöscht",
+    "messageSaved": "Nachricht aktualisiert",
+    "settings": {
+      "title": "Einstellungen",
+      "notifications": "Benachrichtigungen",
+      "dailyReminder": "Tägliche Erinnerung",
+      "dailyReminderDesc": "Erhalten Sie jeden Morgen eine E-Mail, um Ihre Stimmung einzuchecken",
+      "weeklySummary": "Wöchentliche Zusammenfassung",
+      "weeklySummaryDesc": "Erhalten Sie jeden Sonntag eine Zusammenfassung Ihrer Woche",
+      "pushNotifications": "Push-Benachrichtigungen",
+      "pushNotificationsDesc": "Browser-Benachrichtigungen für Echtzeit-Updates zulassen",
+      "saved": "Einstellungen gespeichert",
+      "saveError": "Einstellungen konnten nicht gespeichert werden"
+    }
   }
 }

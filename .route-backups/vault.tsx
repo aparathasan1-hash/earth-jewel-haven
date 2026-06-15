@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { Search, FileText, Headphones, BookOpen, GraduationCap, ArrowLeft } from "lucide-react";
+import { useMemo, useState, useEffect } from "react";
+import { Search, FileText, Headphones, BookOpen, GraduationCap, ArrowLeft, Heart, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { SectionTitle, Paper } from "@/components/villa/Paper";
 import { vaultItems, type VaultItem } from "@/lib/vault-content";
 import { useT } from "@/lib/i18n";
+import { getCurrentUser, getSavedVaultItems, saveVaultItem, unsaveVaultItem } from "@/lib/auth";
 
 export const Route = createFileRoute("/vault")({
   head: () => ({
@@ -90,6 +92,60 @@ function Vault() {
   const t = useT();
   const [q, setQ] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [savedItemIds, setSavedItemIds] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+  const [savingId, setSavingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadUser();
+  }, []);
+
+  async function loadUser() {
+    try {
+      const user = await getCurrentUser();
+      if (user) {
+        setUserId(user.id);
+        const saved = await getSavedVaultItems(user.id);
+        setSavedItemIds(new Set(saved.map((item) => item.id)));
+      }
+    } catch (err) {
+      console.error("Error loading user:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleToggleSave(itemId: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!userId) {
+      toast.error(t("common.loginRequired") || "Please log in to save items");
+      return;
+    }
+
+    setSavingId(itemId);
+    try {
+      const isSaved = savedItemIds.has(itemId);
+      if (isSaved) {
+        await unsaveVaultItem(userId, itemId);
+        setSavedItemIds((prev) => {
+          const next = new Set(prev);
+          next.delete(itemId);
+          return next;
+        });
+        toast.success(t("vault.removedFromSaved") || "Removed from saved");
+      } else {
+        await saveVaultItem(userId, itemId);
+        setSavedItemIds((prev) => new Set(prev).add(itemId));
+        toast.success(t("vault.addedToSaved") || "Added to saved");
+      }
+    } catch (err) {
+      console.error("Error saving item:", err);
+      toast.error(t("common.error") || "Error saving item");
+    } finally {
+      setSavingId(null);
+    }
+  }
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -145,14 +201,33 @@ function Vault() {
       <ul className="grid gap-3 sm:grid-cols-2">
         {filtered.map((i) => {
           const Icon = iconFor(i.type);
+          const isSaved = savedItemIds.has(i.id);
+          const isSaving = savingId === i.id;
           return (
             <li key={i.id}>
               <button
                 type="button"
                 onClick={() => setSelectedId(i.id)}
-                className="animate-fade-up w-full rounded-2xl border border-border bg-card p-5 text-left transition-colors hover:bg-secondary/40"
+                className="animate-fade-up relative w-full rounded-2xl border border-border bg-card p-5 text-left transition-colors hover:bg-secondary/40"
               >
-                <div className="flex items-start gap-4">
+                <button
+                  type="button"
+                  onClick={(e) => handleToggleSave(i.id, e)}
+                  disabled={isSaving}
+                  className="absolute right-4 top-4 rounded-lg p-2 transition-colors hover:bg-secondary disabled:opacity-50"
+                  title={isSaved ? "Remove from saved" : "Save for later"}
+                >
+                  {isSaving ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  ) : (
+                    <Heart
+                      className={`h-5 w-5 transition-colors ${
+                        isSaved ? "fill-destructive text-destructive" : "text-muted-foreground"
+                      }`}
+                    />
+                  )}
+                </button>
+                <div className="flex items-start gap-4 pr-8">
                   <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-secondary text-accent">
                     <Icon className="h-5 w-5" />
                   </span>

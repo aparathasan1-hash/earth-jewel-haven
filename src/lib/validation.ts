@@ -82,3 +82,10 @@ export type LoginFormData = z.infer<typeof loginSchema>;
 export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 export type UpdatePasswordFormData = z.infer<typeof updatePasswordSchema>;
 export type EditProfileFormData = z.infer<typeof editProfileSchema>;
+
+export const moodEntrySchema = z.object({
+  mood: z.number().min(1).max(5),
+  note: z.string().max(200).optional().or(z.literal("")),
+});
+
+export type MoodEntryFormData = z.infer<typeof moodEntrySchema>;

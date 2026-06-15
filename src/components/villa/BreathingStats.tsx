@@ -2,11 +2,56 @@ import { useApp, getTodayTotal } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { X, Calendar, Clock, Target, Flame, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 type Props = {
   open: boolean;
   onClose: () => void;
 };
+
+function getLast7DaysData(history: { date: string; totalSeconds: number }[]): Array<{
+  date: string;
+  day: string;
+  minutes: number;
+}> {
+  const data: { [key: string]: number } = {};
+  const today = new Date();
+
+  // Initialize last 7 days
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split("T")[0];
+    data[dateStr] = 0;
+  }
+
+  // Sum up the seconds for each day
+  history.forEach((session) => {
+    if (data.hasOwnProperty(session.date)) {
+      data[session.date] += session.totalSeconds;
+    }
+  });
+
+  // Convert to chart format
+  return Object.entries(data).map(([dateStr, seconds]) => {
+    const d = new Date(dateStr);
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    return {
+      date: dateStr,
+      day: days[d.getDay()],
+      minutes: Math.round(seconds / 60),
+    };
+  });
+}
 
 function getWeekTotal(history: { date: string; totalSeconds: number }[]): number {
   const now = new Date();
@@ -128,6 +173,49 @@ export function BreathingStats({ open, onClose }: Props) {
                 value={`${streak} ${t("quiet.statsDays")}`}
               />
             </div>
+
+            {/* Activity Chart */}
+            {breathHistory.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm text-muted-foreground font-medium mb-3">
+                  {t("quiet.last7Days") || "Last 7 Days"}
+                </h3>
+                <div className="h-48 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={getLast7DaysData(breathHistory)}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                      <XAxis
+                        dataKey="day"
+                        tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
+                      />
+                      <YAxis
+                        label={{
+                          value: "Minutes",
+                          angle: -90,
+                          position: "insideLeft",
+                          fill: "var(--muted-foreground)",
+                        }}
+                        tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "var(--card)",
+                          border: "1px solid var(--border)",
+                          borderRadius: "8px",
+                        }}
+                        cursor={{ fill: "var(--accent)", opacity: 0.1 }}
+                        formatter={(value: number) => [`${value} min`, "Breathing"]}
+                      />
+                      <Bar
+                        dataKey="minutes"
+                        fill="var(--accent)"
+                        radius={[8, 8, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
 
             {/* Daily goal */}
             <div className="mb-6">

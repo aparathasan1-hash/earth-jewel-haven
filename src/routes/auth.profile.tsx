@@ -11,8 +11,15 @@ import {
   Crown,
   Pencil,
   Heart,
+  BookOpen,
+  FileText,
+  Headphones,
+  GraduationCap,
+  Brain,
+  Settings,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { MoodHeatmap } from "@/components/villa/MoodHeatmap";
 import {
   getCurrentUser,
   getProfile,
@@ -21,11 +28,18 @@ import {
   createRoom,
   signOut,
   getBabies,
+  getMilestones,
   calculatePostpartumDays,
+  calculateBabyAge,
+  getSavedVaultItems,
+  getMoodEntries,
   type Profile,
   type UserBadge,
   type Room,
   type Baby,
+  type BabyMilestone,
+  type VaultItemDB,
+  type MoodEntry,
 } from "@/lib/auth";
 
 export const Route = createFileRoute("/auth/profile")({
@@ -45,6 +59,9 @@ function ProfilePage() {
   const [badges, setBadges] = useState<UserBadge[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [babies, setBabies] = useState<Baby[]>([]);
+  const [savedItems, setSavedItems] = useState<VaultItemDB[]>([]);
+  const [allMilestones, setAllMilestones] = useState<Map<string, BabyMilestone[]>>(new Map());
+  const [moodEntries, setMoodEntries] = useState<MoodEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateRoom, setShowCreateRoom] = useState(false);
   const [roomTitle, setRoomTitle] = useState("");
@@ -80,6 +97,24 @@ function ProfilePage() {
     setBadges(b);
     setRooms(r);
     setBabies(kids);
+
+    // Load saved items and milestones
+    const saved = await getSavedVaultItems(user.id);
+    setSavedItems(saved);
+
+    // Load milestones for each baby
+    if (kids.length > 0) {
+      const milestoneSets = await Promise.all(kids.map((kid) => getMilestones(kid.id)));
+      const milestonesMap = new Map<string, BabyMilestone[]>();
+      kids.forEach((kid, idx) => {
+        milestonesMap.set(kid.id, milestoneSets[idx]);
+      });
+      setAllMilestones(milestonesMap);
+    }
+
+    // Load mood entries
+    const moods = await getMoodEntries(user.id);
+    setMoodEntries(moods);
   }
 
   async function handleLogout() {
@@ -164,6 +199,12 @@ function ProfilePage() {
             >
               <Pencil className="h-4 w-4" /> {t("auth.editProfile")}
             </Link>
+            <Link
+              to="/auth/settings"
+              className="flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <Settings className="h-4 w-4" /> {t("auth.settings") || "Settings"}
+            </Link>
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
@@ -213,6 +254,8 @@ function ProfilePage() {
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             {babies.map((baby) => {
               const days = calculatePostpartumDays(baby.birth_date);
+              const age = calculateBabyAge(baby.birth_date);
+              const milestones = allMilestones.get(baby.id) || [];
               return (
                 <Link
                   key={baby.id}
@@ -235,6 +278,16 @@ function ProfilePage() {
                   <div className="min-w-0 flex-1">
                     <p className="font-medium truncate">{baby.name}</p>
                     <p className="text-xs text-muted-foreground">{days} günlük</p>
+                    <p className="text-xs text-muted-foreground">
+                      {age.years > 0 && `${age.years}y `}
+                      {age.months > 0 && `${age.months}m `}
+                      {age.days}d
+                    </p>
+                    {milestones.length > 0 && (
+                      <p className="text-xs text-accent">
+                        💫 {milestones.length} milestone{milestones.length !== 1 ? "s" : ""}
+                      </p>
+                    )}
                     {baby.gender && (
                       <p className="text-xs text-muted-foreground">
                         {baby.gender === "girl" ? "👧" : baby.gender === "boy" ? "👦" : "🧒"}
@@ -339,6 +392,62 @@ function ProfilePage() {
                 <MessageCircle className="h-4 w-4 text-muted-foreground" />
               </a>
             ))}
+          </div>
+        )}
+      </section>
+
+      {/* Saved Content */}
+      <section className="mt-8">
+        <h2 className="flex items-center gap-2 font-serif text-lg">
+          <Heart className="h-5 w-5 text-accent" /> {t("auth.savedContent") || "Saved Content"}
+        </h2>
+        {savedItems.length === 0 ? (
+          <p className="mt-3 text-sm text-muted-foreground">
+            {t("auth.noSavedContent") || "No saved content yet. Visit the Vault to save your favorite items!"}
+          </p>
+        ) : (
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            {savedItems.map((item) => {
+              const iconMap: { [key: string]: typeof BookOpen } = {
+                Essay: BookOpen,
+                Printable: FileText,
+                Audio: Headphones,
+                Course: GraduationCap,
+              };
+              const Icon = iconMap[item.type] || BookOpen;
+              return (
+                <Link
+                  key={item.id}
+                  to="/vault"
+                  className="flex gap-4 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-secondary/40"
+                >
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-secondary text-accent">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] uppercase tracking-[0.22em] text-accent">{item.type}</p>
+                    <p className="mt-1 font-serif font-medium leading-snug truncate">{item.title}</p>
+                    <p className="mt-1 text-xs text-muted-foreground truncate">{item.blurb}</p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* Mood History */}
+      <section className="mt-8">
+        <h2 className="flex items-center gap-2 font-serif text-lg">
+          <Brain className="h-5 w-5 text-accent" /> {t("auth.moodHistory") || "Mood History"}
+        </h2>
+        {moodEntries.length === 0 ? (
+          <p className="mt-3 text-sm text-muted-foreground">
+            {t("auth.noMoodEntries") || "No mood entries yet. Start checking in daily! 💭"}
+          </p>
+        ) : (
+          <div className="mt-4">
+            <MoodHeatmap moodEntries={moodEntries} />
           </div>
         )}
       </section>

@@ -339,7 +339,8 @@
     "updatePassword": "Mettre à jour le mot de passe",
     "updatePasswordDesc": "Entrez votre nouveau mot de passe.",
     "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
-    "passwordsDoNotMatch": "Les mots de passe ne correspondent pas"
+    "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+    "settings": "Paramètres"
   },
   "error": {
     "notFoundTitle": "Un chemin qui ne mène nulle part",
@@ -355,6 +356,28 @@
     "turkish": "Türkçe",
     "spanish": "Español",
     "french": "Français",
-    "german": "Deutsch"
+    "german": "Deutsch",
+    "howAreYouFeeling": "Comment te sens-tu aujourd'hui?",
+    "addNote": "Ajouter une note (optionnel)",
+    "notePlaceholder": "À quoi penses-tu?",
+    "selectMood": "Veuillez sélectionner une humeur",
+    "moodSaved": "Humeur enregistrée! 💫",
+    "saving": "Enregistrement",
+    "cancel": "Annuler",
+    "error": "Quelque chose s'est mal passé",
+    "deleted": "Supprimé",
+    "messageSaved": "Message mis à jour",
+    "settings": {
+      "title": "Paramètres",
+      "notifications": "Notifications",
+      "dailyReminder": "Rappel Quotidien",
+      "dailyReminderDesc": "Recevez un e-mail chaque matin pour enregistrer votre humeur",
+      "weeklySummary": "Résumé Hebdomadaire",
+      "weeklySummaryDesc": "Recevez un résumé de votre semaine chaque dimanche",
+      "pushNotifications": "Notifications Push",
+      "pushNotificationsDesc": "Autoriser les notifications du navigateur pour les mises à jour en temps réel",
+      "saved": "Paramètres enregistrés",
+      "saveError": "Impossible d'enregistrer les paramètres"
+    }
   }
 }

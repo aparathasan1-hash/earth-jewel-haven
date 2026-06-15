@@ -4,6 +4,8 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useNavigate,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -15,9 +17,11 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { TopBar } from "../components/villa/TopBar";
 import { BottomNav } from "../components/villa/BottomNav";
 import { SecureLockReset } from "../components/villa/SecureLockReset";
+import { DailyCheckIn } from "../components/villa/DailyCheckIn";
 import { useApp } from "../lib/store";
 import { useT } from "../lib/i18n";
 import { PageTransition, SplashOverlay } from "../components/villa/PageTransition";
+import { getCurrentUser, getTodayMood, getOnboardingState } from "../lib/auth";
 
 function NotFoundComponent() {
   const t = useT();
@@ -136,6 +140,75 @@ function ThemeSync() {
   return null;
 }
 
+function DailyCheckInManager() {
+  const [showCheckIn, setShowCheckIn] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function checkDaily() {
+      try {
+        const user = await getCurrentUser();
+        if (!user || cancelled) return;
+
+        setUserId(user.id);
+
+        // Check if user already checked in today
+        const todayMood = await getTodayMood(user.id);
+        if (!todayMood && !cancelled) {
+          // Show modal after 1.5 second delay for better UX
+          setTimeout(() => {
+            if (!cancelled) setShowCheckIn(true);
+          }, 1500);
+        }
+      } catch (err) {
+        console.error("Error checking daily mood:", err);
+      }
+    }
+
+    checkDaily();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!userId) return null;
+
+  return <DailyCheckIn open={showCheckIn} onClose={() => setShowCheckIn(false)} userId={userId} />;
+}
+
+// Yeni (onboarding tamamlamamış) kullanıcıyı sihirbaza yönlendirir.
+function OnboardingManager() {
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  useEffect(() => {
+    let cancelled = false;
+    // Onboarding sayfasının kendisinde veya auth/giriş akışında tetikleme
+    if (pathname.startsWith("/auth/onboarding") || pathname.startsWith("/auth/login")) return;
+
+    async function check() {
+      try {
+        const user = await getCurrentUser();
+        if (!user || cancelled) return;
+        const state = await getOnboardingState(user.id);
+        if (!state.onboarded && !cancelled) {
+          navigate({ to: "/auth/onboarding" });
+        }
+      } catch (err) {
+        console.error("Onboarding check error:", err);
+      }
+    }
+    check();
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname, navigate]);
+
+  return null;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const [showSplash, setShowSplash] = useState(true);
@@ -143,6 +216,8 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeSync />
+      <OnboardingManager />
+      <DailyCheckInManager />
       <SecureLockReset />
       <Toaster
         position="top-center"

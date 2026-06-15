@@ -21,14 +21,21 @@ import { Route as StagesMindRouteImport } from './routes/stages.mind'
 import { Route as StagesCrisisRouteImport } from './routes/stages.crisis'
 import { Route as AuthUpdatePasswordRouteImport } from './routes/auth.update-password'
 import { Route as AuthSignupRouteImport } from './routes/auth.signup'
+import { Route as AuthSettingsRouteImport } from './routes/auth.settings'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AuthProfileRouteImport } from './routes/auth.profile'
+import { Route as AuthOnboardingRouteImport } from './routes/auth.onboarding'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
+import { Route as AuthFriendsRouteImport } from './routes/auth.friends'
+import { Route as AuthFeedRouteImport } from './routes/auth.feed'
 import { Route as AuthEditProfileRouteImport } from './routes/auth.edit-profile'
+import { Route as AuthDiscoverRouteImport } from './routes/auth.discover'
 import { Route as AuthCommunityRouteImport } from './routes/auth.community'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AuthBabyAddRouteImport } from './routes/auth.baby-add'
+import { Route as AuthAssistantRouteImport } from './routes/auth.assistant'
 import { Route as AuthAdminRouteImport } from './routes/auth.admin'
+import { Route as AuthUserUserIdRouteImport } from './routes/auth.user.$userId'
 import { Route as AuthBabyIdRouteImport } from './routes/auth.baby.$id'
 
 const VaultRoute = VaultRouteImport.update({
@@ -91,6 +98,11 @@ const AuthSignupRoute = AuthSignupRouteImport.update({
   path: '/auth/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthSettingsRoute = AuthSettingsRouteImport.update({
+  id: '/auth/settings',
+  path: '/auth/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
   id: '/auth/reset-password',
   path: '/auth/reset-password',
@@ -101,14 +113,34 @@ const AuthProfileRoute = AuthProfileRouteImport.update({
   path: '/auth/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthOnboardingRoute = AuthOnboardingRouteImport.update({
+  id: '/auth/onboarding',
+  path: '/auth/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/auth/login',
   path: '/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthFriendsRoute = AuthFriendsRouteImport.update({
+  id: '/auth/friends',
+  path: '/auth/friends',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthFeedRoute = AuthFeedRouteImport.update({
+  id: '/auth/feed',
+  path: '/auth/feed',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthEditProfileRoute = AuthEditProfileRouteImport.update({
   id: '/auth/edit-profile',
   path: '/auth/edit-profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthDiscoverRoute = AuthDiscoverRouteImport.update({
+  id: '/auth/discover',
+  path: '/auth/discover',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthCommunityRoute = AuthCommunityRouteImport.update({
@@ -126,9 +158,19 @@ const AuthBabyAddRoute = AuthBabyAddRouteImport.update({
   path: '/auth/baby-add',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthAssistantRoute = AuthAssistantRouteImport.update({
+  id: '/auth/assistant',
+  path: '/auth/assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthAdminRoute = AuthAdminRouteImport.update({
   id: '/auth/admin',
   path: '/auth/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthUserUserIdRoute = AuthUserUserIdRouteImport.update({
+  id: '/auth/user/$userId',
+  path: '/auth/user/$userId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthBabyIdRoute = AuthBabyIdRouteImport.update({
@@ -143,13 +185,19 @@ export interface FileRoutesByFullPath {
   '/stages': typeof StagesRouteWithChildren
   '/vault': typeof VaultRoute
   '/auth/admin': typeof AuthAdminRoute
+  '/auth/assistant': typeof AuthAssistantRoute
   '/auth/baby-add': typeof AuthBabyAddRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/community': typeof AuthCommunityRoute
+  '/auth/discover': typeof AuthDiscoverRoute
   '/auth/edit-profile': typeof AuthEditProfileRoute
+  '/auth/feed': typeof AuthFeedRoute
+  '/auth/friends': typeof AuthFriendsRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/onboarding': typeof AuthOnboardingRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/auth/settings': typeof AuthSettingsRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/update-password': typeof AuthUpdatePasswordRoute
   '/stages/crisis': typeof StagesCrisisRoute
@@ -159,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/stages/recovery': typeof StagesRecoveryRoute
   '/stages/support': typeof StagesSupportRoute
   '/auth/baby/$id': typeof AuthBabyIdRoute
+  '/auth/user/$userId': typeof AuthUserUserIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -166,13 +215,19 @@ export interface FileRoutesByTo {
   '/stages': typeof StagesRouteWithChildren
   '/vault': typeof VaultRoute
   '/auth/admin': typeof AuthAdminRoute
+  '/auth/assistant': typeof AuthAssistantRoute
   '/auth/baby-add': typeof AuthBabyAddRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/community': typeof AuthCommunityRoute
+  '/auth/discover': typeof AuthDiscoverRoute
   '/auth/edit-profile': typeof AuthEditProfileRoute
+  '/auth/feed': typeof AuthFeedRoute
+  '/auth/friends': typeof AuthFriendsRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/onboarding': typeof AuthOnboardingRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/auth/settings': typeof AuthSettingsRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/update-password': typeof AuthUpdatePasswordRoute
   '/stages/crisis': typeof StagesCrisisRoute
@@ -182,6 +237,7 @@ export interface FileRoutesByTo {
   '/stages/recovery': typeof StagesRecoveryRoute
   '/stages/support': typeof StagesSupportRoute
   '/auth/baby/$id': typeof AuthBabyIdRoute
+  '/auth/user/$userId': typeof AuthUserUserIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -190,13 +246,19 @@ export interface FileRoutesById {
   '/stages': typeof StagesRouteWithChildren
   '/vault': typeof VaultRoute
   '/auth/admin': typeof AuthAdminRoute
+  '/auth/assistant': typeof AuthAssistantRoute
   '/auth/baby-add': typeof AuthBabyAddRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/community': typeof AuthCommunityRoute
+  '/auth/discover': typeof AuthDiscoverRoute
   '/auth/edit-profile': typeof AuthEditProfileRoute
+  '/auth/feed': typeof AuthFeedRoute
+  '/auth/friends': typeof AuthFriendsRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/onboarding': typeof AuthOnboardingRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/auth/settings': typeof AuthSettingsRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/update-password': typeof AuthUpdatePasswordRoute
   '/stages/crisis': typeof StagesCrisisRoute
@@ -206,6 +268,7 @@ export interface FileRoutesById {
   '/stages/recovery': typeof StagesRecoveryRoute
   '/stages/support': typeof StagesSupportRoute
   '/auth/baby/$id': typeof AuthBabyIdRoute
+  '/auth/user/$userId': typeof AuthUserUserIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -215,13 +278,19 @@ export interface FileRouteTypes {
     | '/stages'
     | '/vault'
     | '/auth/admin'
+    | '/auth/assistant'
     | '/auth/baby-add'
     | '/auth/callback'
     | '/auth/community'
+    | '/auth/discover'
     | '/auth/edit-profile'
+    | '/auth/feed'
+    | '/auth/friends'
     | '/auth/login'
+    | '/auth/onboarding'
     | '/auth/profile'
     | '/auth/reset-password'
+    | '/auth/settings'
     | '/auth/signup'
     | '/auth/update-password'
     | '/stages/crisis'
@@ -231,6 +300,7 @@ export interface FileRouteTypes {
     | '/stages/recovery'
     | '/stages/support'
     | '/auth/baby/$id'
+    | '/auth/user/$userId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -238,13 +308,19 @@ export interface FileRouteTypes {
     | '/stages'
     | '/vault'
     | '/auth/admin'
+    | '/auth/assistant'
     | '/auth/baby-add'
     | '/auth/callback'
     | '/auth/community'
+    | '/auth/discover'
     | '/auth/edit-profile'
+    | '/auth/feed'
+    | '/auth/friends'
     | '/auth/login'
+    | '/auth/onboarding'
     | '/auth/profile'
     | '/auth/reset-password'
+    | '/auth/settings'
     | '/auth/signup'
     | '/auth/update-password'
     | '/stages/crisis'
@@ -254,6 +330,7 @@ export interface FileRouteTypes {
     | '/stages/recovery'
     | '/stages/support'
     | '/auth/baby/$id'
+    | '/auth/user/$userId'
   id:
     | '__root__'
     | '/'
@@ -261,13 +338,19 @@ export interface FileRouteTypes {
     | '/stages'
     | '/vault'
     | '/auth/admin'
+    | '/auth/assistant'
     | '/auth/baby-add'
     | '/auth/callback'
     | '/auth/community'
+    | '/auth/discover'
     | '/auth/edit-profile'
+    | '/auth/feed'
+    | '/auth/friends'
     | '/auth/login'
+    | '/auth/onboarding'
     | '/auth/profile'
     | '/auth/reset-password'
+    | '/auth/settings'
     | '/auth/signup'
     | '/auth/update-password'
     | '/stages/crisis'
@@ -277,6 +360,7 @@ export interface FileRouteTypes {
     | '/stages/recovery'
     | '/stages/support'
     | '/auth/baby/$id'
+    | '/auth/user/$userId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -285,16 +369,23 @@ export interface RootRouteChildren {
   StagesRoute: typeof StagesRouteWithChildren
   VaultRoute: typeof VaultRoute
   AuthAdminRoute: typeof AuthAdminRoute
+  AuthAssistantRoute: typeof AuthAssistantRoute
   AuthBabyAddRoute: typeof AuthBabyAddRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   AuthCommunityRoute: typeof AuthCommunityRoute
+  AuthDiscoverRoute: typeof AuthDiscoverRoute
   AuthEditProfileRoute: typeof AuthEditProfileRoute
+  AuthFeedRoute: typeof AuthFeedRoute
+  AuthFriendsRoute: typeof AuthFriendsRoute
   AuthLoginRoute: typeof AuthLoginRoute
+  AuthOnboardingRoute: typeof AuthOnboardingRoute
   AuthProfileRoute: typeof AuthProfileRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
+  AuthSettingsRoute: typeof AuthSettingsRoute
   AuthSignupRoute: typeof AuthSignupRoute
   AuthUpdatePasswordRoute: typeof AuthUpdatePasswordRoute
   AuthBabyIdRoute: typeof AuthBabyIdRoute
+  AuthUserUserIdRoute: typeof AuthUserUserIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -383,6 +474,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/settings': {
+      id: '/auth/settings'
+      path: '/auth/settings'
+      fullPath: '/auth/settings'
+      preLoaderRoute: typeof AuthSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/reset-password': {
       id: '/auth/reset-password'
       path: '/auth/reset-password'
@@ -397,6 +495,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/onboarding': {
+      id: '/auth/onboarding'
+      path: '/auth/onboarding'
+      fullPath: '/auth/onboarding'
+      preLoaderRoute: typeof AuthOnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/login': {
       id: '/auth/login'
       path: '/auth/login'
@@ -404,11 +509,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/friends': {
+      id: '/auth/friends'
+      path: '/auth/friends'
+      fullPath: '/auth/friends'
+      preLoaderRoute: typeof AuthFriendsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/feed': {
+      id: '/auth/feed'
+      path: '/auth/feed'
+      fullPath: '/auth/feed'
+      preLoaderRoute: typeof AuthFeedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/edit-profile': {
       id: '/auth/edit-profile'
       path: '/auth/edit-profile'
       fullPath: '/auth/edit-profile'
       preLoaderRoute: typeof AuthEditProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/discover': {
+      id: '/auth/discover'
+      path: '/auth/discover'
+      fullPath: '/auth/discover'
+      preLoaderRoute: typeof AuthDiscoverRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/community': {
@@ -432,11 +558,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthBabyAddRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/assistant': {
+      id: '/auth/assistant'
+      path: '/auth/assistant'
+      fullPath: '/auth/assistant'
+      preLoaderRoute: typeof AuthAssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/admin': {
       id: '/auth/admin'
       path: '/auth/admin'
       fullPath: '/auth/admin'
       preLoaderRoute: typeof AuthAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/user/$userId': {
+      id: '/auth/user/$userId'
+      path: '/auth/user/$userId'
+      fullPath: '/auth/user/$userId'
+      preLoaderRoute: typeof AuthUserUserIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/baby/$id': {
@@ -476,16 +616,23 @@ const rootRouteChildren: RootRouteChildren = {
   StagesRoute: StagesRouteWithChildren,
   VaultRoute: VaultRoute,
   AuthAdminRoute: AuthAdminRoute,
+  AuthAssistantRoute: AuthAssistantRoute,
   AuthBabyAddRoute: AuthBabyAddRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   AuthCommunityRoute: AuthCommunityRoute,
+  AuthDiscoverRoute: AuthDiscoverRoute,
   AuthEditProfileRoute: AuthEditProfileRoute,
+  AuthFeedRoute: AuthFeedRoute,
+  AuthFriendsRoute: AuthFriendsRoute,
   AuthLoginRoute: AuthLoginRoute,
+  AuthOnboardingRoute: AuthOnboardingRoute,
   AuthProfileRoute: AuthProfileRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
+  AuthSettingsRoute: AuthSettingsRoute,
   AuthSignupRoute: AuthSignupRoute,
   AuthUpdatePasswordRoute: AuthUpdatePasswordRoute,
   AuthBabyIdRoute: AuthBabyIdRoute,
+  AuthUserUserIdRoute: AuthUserUserIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

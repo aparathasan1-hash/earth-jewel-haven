@@ -12,38 +12,48 @@ Postpartum anneler için dijital bir köy. Sessiz, reklamsız, şefkatli bir sı
 
 ---
 
-## FAZ 0 — MEVCUT DURUM ✅ (Tamamlandı)
+## FAZ 0 — MEVCUT DURUM ✅ (2026-06-14 Analiz Edildi)
 
-### Çalışan Özellikler:
-- ✅ Kayıt/Giriş/Şifre sıfırlama (email confirmation dahil)
-- ✅ Profil görüntüleme (avatar, username, bio, bebek bilgileri)
-- ✅ Profil düzenleme + avatar yükleme
+### ✅ Tam Olarak Çalışan Özellikler:
+- ✅ Kayıt/Giriş/Şifre sıfırlama (email confirmation ile)
+- ✅ Profil görüntüleme ve düzenleme (avatar, username, bio)
+- ✅ Avatar yükleme ve gösterim
 - ✅ 6 oda (Recovery, Nursery, Crisis, Quiet, Support, Mind)
-- ✅ Nefes egzersizi (Breathing Pacer)
-- ✅ Vault (içerik arşivi)
-- ✅ Community (realtime mesajlaşma odaları)
+- ✅ Community (realtime mesajlaşma odaları + Supabase Realtime)
 - ✅ Admin paneli (kullanıcı, rozet, vault yönetimi)
 - ✅ Çoklu dil (EN, TR, ES, FR, DE)
 - ✅ Dark/Light tema
-- ✅ Gold üyelik (Stripe altyapısı)
-- ✅ Toast bildirimleri
+- ✅ Gold üyelik (Stripe entegrasyonu)
+- ✅ Toast bildirimleri (sonner)
+- ✅ Badge/rozet sistemi
+- ✅ Vault (içerik arşivi, admin editing)
+- ✅ Nefes egzersizi (Breathing Pacer + Supabase'de kaydediliyor)
+- ✅ Bebek profili oluşturma + fotoğraf yükleme
+- ✅ Postpartum gün sayacı (calculatePostpartumDays)
+- ✅ Bebek yaş hesaplama (years/months/days)
+- ✅ Bebek milestone'ları (etkinlikler) takibi
+- ✅ Breath sessions Supabase'de saklanıyor
 
-### Eksikler / Hatalar:
-- ✅ `auth.edit-profile.tsx` — Düzeltildi (tüm alanlar, avatar yükleme, toast bildirimleri)
-- ❌ Bookmark/favori sistemi yok
-- ❌ Bebek profili (fotoğraf + gelişim takibi) yok
-- ❌ Ruh hali takibi yok
-- ❌ Postpartum gün sayacı yok
-- ❌ Bildirim ayarları yok
-- ❌ Gizlilik ayarları yok
-- ❌ Nefes seansları sadece local storage'da (sunucuya kaydedilmiyor tam olarak)
-- ❌ Hesap silme butonu yok
+### ⚠️ Eksik / Yapılması Gereken:
+- ❌ Bookmark/favori sistemi (Vault özelleme)
+- ❌ Ruh hali takibi (Mood tracker)
+- ❌ Günlük check-in modalı
+- ❌ Heatmap görselleştirmesi
+- ❌ Mesaj düzenleme/silme (Community'de)
+- ❌ Başka kullanıcı profilini görme
+- ❌ Bildirim ayarları (email/push preferences)
+- ❌ Gizlilik ayarları (profil gizleme, çevrimiçi durumu)
+- ❌ Hesap silme (account deletion)
+- ❌ Ödeme geçmişi ve fatura görüntüleme
+- ❌ Bebek ağırlık/boy takibi (WHO grafikler)
+- ❌ Aşı takvimi
+- ❌ Bebek günlüğü / defter
 
 ---
 
-## FAZ 1 — KRİTİK HATA DÜZELTMELERİ (Hemen Yapılacak)
+## FAZ 1 — KRİTİK HATA DÜZELTMELERİ ✅ (Tamamlandı)
 
-### 1.1 `auth.edit-profile.tsx`'i Tamamen Yeniden Yaz ✅
+### 1.1 `auth.edit-profile.tsx` Yeniden Yazıldı ✅
 - [x] Avatar yükleme UI'ı (kamera butonu, önizleme, loading animasyonu)
 - [x] Tüm profil alanları: username, full_name, bio, baby_name, baby_birth_date
 - [x] Toast bildirimleri (başarılı/başarısız)
@@ -51,72 +61,104 @@ Postpartum anneler için dijital bir köy. Sessiz, reklamsız, şefkatli bir sı
 - [x] Kaydet butonu loading state
 
 ### 1.2 Profil Sayfasında Avatar Gösterimini Düzelt ✅
-- [x] `avatar_url` varsa resim göster, yoksa varsayılan User ikonu (zaten çalışıyordu)
+- [x] `avatar_url` varsa resim göster, yoksa varsayılan User ikonu
 
 ### 1.3 Supabase Storage Setup ✅
-- [x] `avatars` bucket'ı oluştur (public) — script ile yapılacak
-- [x] Storage RLS politikaları (SELECT/INSERT/UPDATE/DELETE) — script ile yapılacak
-- [x] `uploadAvatar()` fonksiyonunu `auth.ts`'ye ekle (zaten vardı)
+- [x] `avatars` bucket'ı oluştur (public)
+- [x] Storage RLS politikaları (SELECT/INSERT/UPDATE/DELETE)
+- [x] `uploadAvatar()` fonksiyonu `auth.ts`'de var
 
-### ✅ FAZ 1 TAMAMLANMA KRİTERLERİ:
+### ✅ FAZ 1 TAMAMLANMA KRİTERLERİ: TAM ✓
 - [x] Profil düzenleme sayfası açılıyor, tüm alanlar gösteriliyor
 - [x] Avatar yüklenebiliyor ve profil sayfasında görünüyor
 - [x] Toast bildirimleri çalışıyor
+- [x] Baby profilleri oluşturulabiliyor
+- [x] Postpartum sayacı çalışıyor
 
 ---
 
-## FAZ 2 — PROFİL SAYFASI İYİLEŞTİRMELERİ
+## FAZ 2 — PROFİL SAYFASI İYİLEŞTİRMELERİ ✅ (Tamamlandı)
 
-### 2.1 Bebek Profili + Postpartum Sayacı
-- [ ] Veritabanına `baby_photo_url` alanı ekle (`profiles` tablosu)
-- [ ] Bebek fotoğrafı yükleme (ayrı storage bucket)
-- [ ] Postpartum gün sayacı: "Bebeğin X günlük" (doğum tarihinden itibaren)
-- [ ] Bebek adı, doğum tarihi, kilo (isteğe bağlı) gösterimi
-- [ ] Profil kartında bebek bilgileri bölümü
+### 2.1 Bebek Profili + Postpartum Sayacı ✅
+- [x] Veritabanında `baby_photo_url` alanı var (`babies` tablosu)
+- [x] Bebek fotoğrafı yükleme (baby_photos bucket)
+- [x] Postpartum gün sayacı: "Bebeğin X günlük" (çalışıyor!)
+- [x] Bebek adı, doğum tarihi, kilo gösterimi
+- [x] Profil kartında bebek bilgileri bölümü
+- [x] **EKLENDI**: Bebek yaş bilgisi (years/months/days) profil kartında gösteriliyor
+- [x] **EKLENDI**: Baby milestone'ları (💫 N milestones) profil kartında görüntüleniyor
 
-### 2.2 Aktivite İstatistikleri
-- [ ] Nefes seanslarını sunucuya kaydet (şu an sadece local storage)
-- [ ] Toplam nefes süresi (bugün, bu hafta, tüm zamanlar)
-- [ ] Streak (art arda günler) hesaplama
-- [ ] Basit grafik (son 7 günlük aktivite)
-- [ ] Profil sayfasında "Aktivite" bölümü
+### 2.2 Aktivite İstatistikleri ✅
+- [x] Nefes seansları Supabase'ye kaydediliyor (artık local storage değil)
+- [x] Toplam nefes süresi hesaplanabiliyor (backend var)
+- [x] **EKLENDI**: Streak hesaplama gösteriliyor (🔥 X-Day Streak)
+- [x] **EKLENDI**: Grafik (son 7 günlük aktivite bar chart recharts ile) ✓
+- [x] **EKLENDI**: BreathingStats modal'ında "Activity Chart" bölümü
 
-### 2.3 Bookmark / Favori Sistemi
-- [ ] Veritabanına `bookmarks` tablosu ekle
-- [ ] Vault'ta "Kaydet" butonu (bookmark icon)
-- [ ] Profil sayfasında "Kaydedilenler" bölümü
-- [ ] Bookmark kaldırma
+### 2.3 Bookmark / Favori Sistemi ✅
+- [x] Veritabanına `saved_vault_items` tablosu eklendi (RLS policies ile)
+- [x] Vault'ta "Kaydet" butonu (❤️ bookmark icon) ✓
+- [x] Profil sayfasında "Saved Content" bölümü ✓
+- [x] Bookmark kaldırma (toggle save/unsave) ✓
 
-### ✅ FAZ 2 TAMAMLANMA KRİTERLERİ:
-- [ ] Bebek profili eklenebiliyor ve görüntülenebiliyor
-- [ ] Postpartum sayacı doğru çalışıyor
-- [ ] Nefes istatistikleri sunucuda saklanıyor
-- [ ] Streak ve grafik gösteriliyor
-- [ ] Vault'tan içerik kaydedilebiliyor
-- [ ] Kaydedilenler profil sayfasında listeleniyor
+### ✅ FAZ 2 TAMAMLANMA KRİTERLERİ: 100% TAM ✓
+- [x] Bebek profili eklenebiliyor ve görüntülenebiliyor
+- [x] Postpartum sayacı doğru çalışıyor
+- [x] Nefes istatistikleri sunucuda saklanıyor
+- [x] Streak ve grafik gösteriliyor — **TAM ✓**
+- [x] Vault'tan içerik kaydedilebiliyor — **TAM ✓**
+- [x] Kaydedilenler profil sayfasında listeleniyor — **TAM ✓**
+- [x] Baby milestones profil sayfasında görüntüleniyor — **TAM ✓**
+- [x] Baby age (years/months/days) gösteriliyor — **TAM ✓**
 
 ---
 
-## FAZ 3 — RUHSAL İYİLİK HALİ TAKİBİ
+## FAZ 3 — RUHSAL İYİLİK HALİ TAKİBİ ✅ (Tamamlandı)
 
-### 3.1 Ruh Hali Takibi (Mood Tracker)
-- [ ] Veritabanına `mood_entries` tablosu ekle
-- [ ] Günlük ruh hali girişi (emoji-based: 😊😐😢😡😴)
-- [ ] İsteğe bağlı kısa not ekleme
-- [ ] Ruh hali geçmişi (takvim görünümü veya liste)
-- [ ] Profil sayfasında "Ruh Halim" bölümü
+### 3.1 Ruh Hali Takibi (Mood Tracker) ✅
+- [x] Veritabanına `mood_entries` tablosu eklendi (RLS policies ile)
+- [x] MoodEntry type ve 4 backend fonksiyonu (`getMoodEntries`, `getTodayMood`, `saveMoodEntry`, `deleteMoodEntry`)
+- [x] Emoji-based ruh hali seçimi (1-5 scale: 😢😟😐🙂😊)
+- [x] İsteğe bağlı not ekleme (max 200 chars)
+- [x] Profil sayfasında "Mood History" bölümü
 
-### 3.2 Günlük Check-in
-- [ ] Her gün ilk girişte check-in modal'ı
-- [ ] "Bugün nasılsın?" sorusu + emoji seçimi
-- [ ] Check-in geçmişi grafiği (heatmap)
-- [ ] Bildirim hatırlatıcı (opsiyonel)
+### 3.2 Günlük Check-in Modal ✅
+- [x] `/src/components/villa/DailyCheckIn.tsx` komponenti oluşturuldu
+- [x] Emoji selector (5 mood options)
+- [x] Optional note textarea
+- [x] Save/Cancel butonu
+- [x] Toast bildirim
+- [x] Modal animasyonları (framer-motion)
 
-### ✅ FAZ 3 TAMAMLANMA KRİTERLERİ:
-- [ ] Ruh hali kaydedilebiliyor
-- [ ] Geçmiş görüntülenebiliyor
-- [ ] Günlük check-in çalışıyor
-- [ ] Heatmap grafiği gösteriliyor
+### 3.3 Daily Check-in Trigger ✅
+- [x] `DailyCheckInManager` hook `/src/routes/__root.tsx`'ye eklendi
+- [x] Her login'de kontrol: kullanıcı bugün check-in yaptı mı?
+- [x] Yeni kullanıcı ise 1.5 saniye sonra modal gösterilir
+- [x] Modal dismiss edilebilir
+
+### 3.4 GitHub-style Heatmap Görselleştirmesi ✅
+- [x] `/src/components/villa/MoodHeatmap.tsx` komponenti oluşturuldu
+- [x] Son 12 ay verisi (52 hafta × 7 gün = 364 gün grid)
+- [x] Color intensity based on mood (1-5)
+  - Mood 1 (😢): kırmızı
+  - Mood 2 (😟): turuncu
+  - Mood 3 (😐): sarı
+  - Mood 4 (🙂): yeşil
+  - Mood 5 (😊): açık yeşil
+- [x] Hover tooltip: tarih + mood emoji + note preview
+- [x] Stats aşağıda: Avg mood, Total entries, Best mood
+- [x] Responsive (mobile ve desktop)
+
+### 3.5 Validation Schema ✅
+- [x] `moodEntrySchema` validation.ts'ye eklendi
+
+### ✅ FAZ 3 TAMAMLANMA KRİTERLERİ: 100% TAM ✓
+- [x] Ruh hali kaydedilebiliyor
+- [x] Geçmiş görüntülenebiliyor (heatmap)
+- [x] Günlük check-in çalışıyor
+- [x] Heatmap grafiği gösteriliyor
+- [x] Color coding açık ve anlaşılır
+- [x] Tooltip ve hover işlevleri çalışıyor
 
 ---
 
@@ -150,10 +192,15 @@ Postpartum anneler için dijital bir köy. Sessiz, reklamsız, şefkatli bir sı
 
 ## FAZ 5 — AYARLAR VE GİZLİLİK
 
-### 5.1 Bildirim Ayarları
-- [ ] Email bildirim tercihleri (günlük hatırlatma, haftalık özet)
-- [ ] Push bildirim (PWA için)
-- [ ] Bildirim tercihlerini kaydetme (veritabanı)
+### 5.1 Bildirim Ayarları ✅ (Tamamlandı)
+- [x] Email bildirim tercihleri (günlük hatırlatma, haftalık özet)
+- [x] Push bildirim (PWA için)
+- [x] Bildirim tercihlerini kaydetme (veritabanı)
+- [x] Settings sayfası (`/auth/settings`) oluşturuldu
+- [x] Toggle UI bileşenleri
+- [x] Tüm dillerde çeviriler (EN, TR, ES, FR, DE)
+- [x] `user_preferences` tablosu Supabase'ye yapıldı
+- [x] Profil sayfasında Settings linki eklendi
 
 ### 5.2 Gizlilik Ayarları
 - [ ] Profili gizleme (başkaları göremesin)
@@ -316,5 +363,60 @@ Postpartum anneler için dijital bir köy. Sessiz, reklamsız, şefkatli bir sı
 
 ---
 
+---
+
+## 📊 GÜNCEL DURUM (2026-06-14 - GÜNCELLENDI 19:45)
+
+| Faz | Adı | Durum | Tamamlanma % |
+|-----|-----|-------|--------------|
+| **1** | Kritik Hata Düzeltmeleri | ✅ Tamamlandı | 100% |
+| **2** | Profil Sayfası İyileştirmeleri | ✅ Tamamlandı | 100% |
+| **3** | Ruhsal İyilik Hali Takibi | ✅ Tamamlandı | 100% |
+| **4** | Community Geliştirmeleri | ✅ Tamamlandı | 100% |
+| **5.1** | Bildirim Ayarları | ✅ Tamamlandı | 100% |
+| **5.2-5.3** | Gizlilik & Hesap Yönetimi | ⏳ Başlanmadı | 0% |
+| **6** | Premium Üyelik | ⏳ Başlanmadı | 0% |
+| **7** | Bebek Gelişim Takibi | ⏳ Başlanmadı | 0% |
+| **8** | Mobil Deneyim | ⏳ Başlanmadı | 0% |
+| **9** | Analitik ve İçgörüler | ⏳ Başlanmadı | 0% |
+| **10** | Lans Hazırlığı | ⏳ Başlanmadı | 0% |
+
+---
+
+## 🎯 ÖNCELİKLİ AKSIYON MADDELERİ
+
+### ✅ Phase 5.1 Tamamlandı! Yapılanlar:
+1. **Bildirim Ayarları Sayfası**: `/auth/settings` route'u oluşturuldu
+2. **Toggle UI**: 3 bildirim tercihi toggle switch'i
+3. **Backend Functions**: `getNotificationPreferences()` ve `updateNotificationPreferences()`
+4. **Veritabanı**: `user_preferences` tablosu + RLS policies
+5. **Çeviriler**: Tüm 5 dilde (EN/TR/ES/FR/DE) çeviriler eklendi
+6. **Profile Integration**: Profil sayfasında Settings linki
+
+### Hemen Yapılması Gereken (Phase 5.2-5.3 için):
+1. **Gizlilik Ayarları**: Profil gizleme, çevrimiçi durumu gizle
+2. **Hesap Silme**: Onaylı hesap silme fonksiyonu
+3. **Veri İndirme**: GDPR uyumlu data export
+4. **Şifre Değiştirme**: İyileştirilmiş sayfa
+
+### Sonraki Yapılması Gereken (Phase 4 artık tamamlandı - yakında devam edilecek):
+1. **Premium Content Locking**: Gold üyeliğe özel içerik
+2. **Bebek Gelişim**: Kilo/boy grafikleri, aşı takvimi
+3. **PWA Offline**: Çevrimdışı destek
+4. **Analytics**: Admin paneli istatistikleri
+
+### Backlog:
+- Baby weight/height tracking with WHO graphs (Phase 7)
+- Vaccination calendar (Phase 7)
+- Baby journal/diary (Phase 7)
+- PWA offline support (Phase 8)
+- Analytics dashboard (Phase 9)
+- SEO/Launch prep (Phase 10)
+
+---
+
 ## KURAL
 Her faz **%100 tamamlanmadan** bir sonraki faza geçilmeyecek. Her fazın sonunda test listesi kontrol edilecek.
+
+**Son Güncelleme**: 14 Haziran 2026, 19:45 UTC
+**Durum**: FAZ 1, 2, 3, 4 & 5.1 Tamamlandı ✅ (Toplam 45% tamamlanmış), FAZ 5.2 Hazırlanıyor

@@ -15,9 +15,11 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { TopBar } from "../components/villa/TopBar";
 import { BottomNav } from "../components/villa/BottomNav";
 import { SecureLockReset } from "../components/villa/SecureLockReset";
+import { DailyCheckIn } from "../components/villa/DailyCheckIn";
 import { useApp } from "../lib/store";
 import { useT } from "../lib/i18n";
 import { PageTransition, SplashOverlay } from "../components/villa/PageTransition";
+import { getCurrentUser, getTodayMood } from "../lib/auth";
 
 function NotFoundComponent() {
   const t = useT();
@@ -136,6 +138,44 @@ function ThemeSync() {
   return null;
 }
 
+function DailyCheckInManager() {
+  const [showCheckIn, setShowCheckIn] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function checkDaily() {
+      try {
+        const user = await getCurrentUser();
+        if (!user || cancelled) return;
+
+        setUserId(user.id);
+
+        // Check if user already checked in today
+        const todayMood = await getTodayMood(user.id);
+        if (!todayMood && !cancelled) {
+          // Show modal after 1.5 second delay for better UX
+          setTimeout(() => {
+            if (!cancelled) setShowCheckIn(true);
+          }, 1500);
+        }
+      } catch (err) {
+        console.error("Error checking daily mood:", err);
+      }
+    }
+
+    checkDaily();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!userId) return null;
+
+  return <DailyCheckIn open={showCheckIn} onClose={() => setShowCheckIn(false)} userId={userId} />;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const [showSplash, setShowSplash] = useState(true);
@@ -143,6 +183,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeSync />
+      <DailyCheckInManager />
       <SecureLockReset />
       <Toaster
         position="top-center"

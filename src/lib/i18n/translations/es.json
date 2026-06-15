@@ -339,7 +339,8 @@
     "updatePassword": "Actualizar contraseña",
     "updatePasswordDesc": "Ingresa tu nueva contraseña.",
     "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
-    "passwordsDoNotMatch": "Las contraseñas no coinciden"
+    "passwordsDoNotMatch": "Las contraseñas no coinciden",
+    "settings": "Configuración"
   },
   "error": {
     "notFoundTitle": "Un camino que no lleva a ninguna parte",
@@ -355,6 +356,28 @@
     "turkish": "Türkçe",
     "spanish": "Español",
     "french": "Français",
-    "german": "Deutsch"
+    "german": "Deutsch",
+    "howAreYouFeeling": "¿Cómo te sientes hoy?",
+    "addNote": "Añadir una nota (opcional)",
+    "notePlaceholder": "¿En qué estás pensando?",
+    "selectMood": "Por favor, selecciona un estado de ánimo",
+    "moodSaved": "¡Estado de ánimo guardado! 💫",
+    "saving": "Guardando",
+    "cancel": "Cancelar",
+    "error": "Algo salió mal",
+    "deleted": "Eliminado",
+    "messageSaved": "Mensaje actualizado",
+    "settings": {
+      "title": "Configuración",
+      "notifications": "Notificaciones",
+      "dailyReminder": "Recordatorio Diario",
+      "dailyReminderDesc": "Recibe un correo electrónico cada mañana para registrar tu estado de ánimo",
+      "weeklySummary": "Resumen Semanal",
+      "weeklySummaryDesc": "Recibe un resumen de tu semana cada domingo",
+      "pushNotifications": "Notificaciones Push",
+      "pushNotificationsDesc": "Permitir notificaciones del navegador para actualizaciones en tiempo real",
+      "saved": "Configuración guardada",
+      "saveError": "No se pudieron guardar los ajustes"
+    }
   }
 }

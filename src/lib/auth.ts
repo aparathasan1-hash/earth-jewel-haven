@@ -43,7 +43,8 @@ export type RoomMessage = {
   user_id: string;
   content: string;
   created_at: string;
-  profiles?: { username: string | null; full_name: string | null };
+  edited_at: string | null;
+  profiles?: { username: string | null; full_name: string | null; avatar_url: string | null };
 };
 
 // --- Baby Profile ---
@@ -244,7 +245,7 @@ export async function createRoom(userId: string, title: string, description: str
 export async function getRoomMessages(roomId: string): Promise<RoomMessage[]> {
   const { data } = await supabase
     .from("room_messages")
-    .select("*, profiles(username, full_name)")
+    .select("*, profiles(username, full_name, avatar_url)")
     .eq("room_id", roomId)
     .order("created_at", { ascending: true });
   return (data as RoomMessage[]) ?? [];
@@ -257,6 +258,105 @@ export async function sendMessage(roomId: string, userId: string, content: strin
     content,
   });
   if (error) throw error;
+  // Oda katılımcılarına push (best-effort)
+  try {
+    const { notifyRoomMessage } = await import("./api/push.functions");
+    await notifyRoomMessage({
+      data: { roomId, senderId: userId, preview: content.slice(0, 120) },
+    });
+  } catch (e) {
+    console.warn("notifyRoomMessage başarısız:", e);
+  }
+}
+
+export async function editMessage(messageId: string, userId: string, newContent: string) {
+  const { error } = await supabase
+    .from("room_messages")
+    .update({ content: newContent, edited_at: new Date().toISOString() })
+    .eq("id", messageId)
+    .eq("user_id", userId);
+  if (error) throw error;
+}
+
+export async function deleteMessage(messageId: string, userId: string) {
+  const { error } = await supabase
+    .from("room_messages")
+    .delete()
+    .eq("id", messageId)
+    .eq("user_id", userId);
+  if (error) throw error;
+}
+
+export async function getRoomMemberCount(roomId: string): Promise<number> {
+  // Supabase JS'te .distinct() yok; benzersiz üye sayısını JS'te hesaplıyoruz.
+  const { data, error } = await supabase
+    .from("room_messages")
+    .select("user_id")
+    .eq("room_id", roomId);
+  if (error) throw error;
+  return data ? new Set(data.map((d) => d.user_id)).size : 0;
+}
+
+export async function getRoomDetails(roomId: string): Promise<RoomDetailedInfo | null> {
+  const user = await getCurrentUser();
+  const { data: roomData } = await supabase
+    .from("rooms")
+    .select("*")
+    .eq("id", roomId)
+    .single();
+
+  if (!roomData) return null;
+
+  const memberCount = await getRoomMemberCount(roomId);
+
+  const { data: lastMsg } = await supabase
+    .from("room_messages")
+    .select("created_at")
+    .eq("room_id", roomId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  return {
+    ...(roomData as Room),
+    memberCount,
+    lastMessageTime: lastMsg?.created_at || null,
+    isOwner: user?.id === roomData.user_id,
+  };
+}
+
+export async function getPublicProfile(userId: string): Promise<PublicProfileInfo | null> {
+  const { data: profileData } = await supabase
+    .from("profiles")
+    .select("id, username, full_name, avatar_url, bio, membership_type, created_at")
+    .eq("id", userId)
+    .single();
+
+  if (!profileData) return null;
+
+  const [badges, rooms, moodEntries] = await Promise.all([
+    getUserBadges(userId),
+    getMyRooms(userId),
+    getMoodEntries(userId),
+  ]);
+
+  return {
+    id: profileData.id,
+    username: profileData.username,
+    full_name: profileData.full_name,
+    avatar_url: profileData.avatar_url,
+    bio: profileData.bio,
+    membership_type: profileData.membership_type,
+    created_at: profileData.created_at,
+    badges,
+    rooms,
+    moodStats: {
+      totalEntries: moodEntries.length,
+      averageMood: moodEntries.length > 0
+        ? Math.round((moodEntries.reduce((sum, e) => sum + e.mood, 0) / moodEntries.length) * 10) / 10
+        : 0,
+    },
+  };
 }
 
 // --- Admin ---
@@ -329,6 +429,46 @@ export async function updateVaultItem(id: string, updates: Partial<VaultItemDB>)
 export async function deleteVaultItem(id: string) {
   const { error } = await supabase.from("vault_items").delete().eq("id", id);
   if (error) throw error;
+}
+
+// --- Bookmarks (Saved Vault Items) ---
+
+export async function getSavedVaultItems(userId: string): Promise<VaultItemDB[]> {
+  const { data } = await supabase
+    .from("saved_vault_items")
+    .select("vault_items(*)")
+    .eq("user_id", userId)
+    .order("saved_at", { ascending: false });
+
+  if (!data) return [];
+  return data.map((item: any) => item.vault_items as VaultItemDB);
+}
+
+export async function saveVaultItem(userId: string, vaultItemId: string) {
+  const { error } = await supabase.from("saved_vault_items").insert({
+    user_id: userId,
+    vault_item_id: vaultItemId,
+  });
+  if (error) throw error;
+}
+
+export async function unsaveVaultItem(userId: string, vaultItemId: string) {
+  const { error } = await supabase
+    .from("saved_vault_items")
+    .delete()
+    .eq("user_id", userId)
+    .eq("vault_item_id", vaultItemId);
+  if (error) throw error;
+}
+
+export async function checkIfVaultItemSaved(userId: string, vaultItemId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from("saved_vault_items")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("vault_item_id", vaultItemId)
+    .single();
+  return !!data;
 }
 
 // --- Breath Sessions ---
@@ -489,4 +629,563 @@ export function calculateBabyAge(birthDate: string): { years: number; months: nu
   }
   
   return { years, months, days };
+}
+
+// --- Mood Tracker ---
+
+export type MoodEntry = {
+  id: string;
+  user_id: string;
+  entry_date: string;
+  mood: 1 | 2 | 3 | 4 | 5;
+  emoji?: string;
+  note?: string;
+  created_at: string;
+  updated_at: string;
+};
+
+// --- Community Enhancements ---
+
+export type RoomDetailedInfo = Room & {
+  memberCount: number;
+  lastMessageTime: string | null;
+  isOwner: boolean;
+};
+
+export type PublicProfileInfo = {
+  id: string;
+  username: string | null;
+  full_name: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  membership_type: "free" | "gold";
+  created_at: string;
+  badges: UserBadge[];
+  rooms: Room[];
+  breathStats?: {
+    totalMinutes: number;
+    streak: number;
+  };
+  moodStats?: {
+    totalEntries: number;
+    averageMood: number;
+  };
+};
+
+// --- Settings & Preferences ---
+
+export type VisibilityLevel = "everyone" | "friends" | "none";
+export type ProfileVisibility = "public" | "friends" | "private";
+
+export type NotificationPreferences = {
+  id: string;
+  user_id: string;
+  email_daily_reminder: boolean;
+  email_weekly_summary: boolean;
+  push_notifications: boolean;
+  // Gizlilik tercihleri (Aşama B)
+  profile_visibility: ProfileVisibility;
+  show_baby_info: VisibilityLevel;
+  show_mood: VisibilityLevel;
+  show_activity: VisibilityLevel;
+  show_online_status: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export async function getMoodEntries(userId: string): Promise<MoodEntry[]> {
+  const { data } = await supabase
+    .from("mood_entries")
+    .select("*")
+    .eq("user_id", userId)
+    .order("entry_date", { ascending: false });
+  return (data as MoodEntry[]) ?? [];
+}
+
+export async function getTodayMood(userId: string): Promise<MoodEntry | null> {
+  const today = new Date().toISOString().split("T")[0];
+  const { data } = await supabase
+    .from("mood_entries")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("entry_date", today)
+    .single();
+  return (data as MoodEntry) || null;
+}
+
+export async function saveMoodEntry(userId: string, mood: 1 | 2 | 3 | 4 | 5, note?: string) {
+  const today = new Date().toISOString().split("T")[0];
+  const moodEmojis = ["😢", "😟", "😐", "🙂", "😊"];
+  const emoji = moodEmojis[mood - 1];
+
+  const { error } = await supabase.from("mood_entries").upsert({
+    user_id: userId,
+    entry_date: today,
+    mood,
+    emoji,
+    note: note || null,
+  });
+  if (error) throw error;
+}
+
+export async function deleteMoodEntry(userId: string, entryDate: string) {
+  const { error } = await supabase
+    .from("mood_entries")
+    .delete()
+    .eq("user_id", userId)
+    .eq("entry_date", entryDate);
+  if (error) throw error;
+}
+
+// --- Notification Preferences ---
+
+export async function getNotificationPreferences(userId: string): Promise<NotificationPreferences> {
+  let { data } = await supabase
+    .from("user_preferences")
+    .select("*")
+    .eq("user_id", userId)
+    .single();
+
+  if (!data) {
+    const { data: newPrefs } = await supabase
+      .from("user_preferences")
+      .insert({
+        user_id: userId,
+        email_daily_reminder: true,
+        email_weekly_summary: true,
+        push_notifications: false,
+      })
+      .select()
+      .single();
+    return newPrefs as NotificationPreferences;
+  }
+
+  return data as NotificationPreferences;
+}
+
+export async function updateNotificationPreferences(
+  userId: string,
+  updates: Partial<NotificationPreferences>
+) {
+  const { error } = await supabase
+    .from("user_preferences")
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("user_id", userId);
+
+  if (error) throw error;
+}
+
+// --- Onboarding & Keşif (Faz 2) ---
+
+export type OnboardingState = {
+  onboarded: boolean;
+  city: string | null;
+  interests: string[];
+};
+
+export async function getOnboardingState(userId: string): Promise<OnboardingState> {
+  const { data } = await supabase
+    .from("user_preferences")
+    .select("onboarded, city, interests")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!data) {
+    // Tercih satırı yoksa oluştur (varsayılan: onboarded=false)
+    await supabase.from("user_preferences").insert({ user_id: userId }).select().maybeSingle();
+    return { onboarded: false, city: null, interests: [] };
+  }
+  return {
+    onboarded: Boolean(data.onboarded),
+    city: (data.city as string) ?? null,
+    interests: (data.interests as string[]) ?? [],
+  };
+}
+
+export async function updateOnboarding(
+  userId: string,
+  updates: { city?: string | null; interests?: string[]; onboarded?: boolean }
+) {
+  const { error } = await supabase
+    .from("user_preferences")
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq("user_id", userId);
+  if (error) throw error;
+}
+
+export type DiscoverProfile = {
+  id: string;
+  username: string | null;
+  full_name: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  baby_birth_date: string | null;
+  city: string | null;
+  shared_interests: number;
+  same_city: boolean;
+  baby_age_days_diff: number | null;
+};
+
+// Bebek yaşı + şehir + ortak ilgi alanına göre arkadaş önerileri.
+// Gizliliği SECURITY DEFINER SQL fonksiyonu (discover_profiles) uygular.
+export async function discoverProfiles(
+  userId: string,
+  limit = 30
+): Promise<DiscoverProfile[]> {
+  const { data, error } = await supabase.rpc("discover_profiles", {
+    p_viewer: userId,
+    p_limit: limit,
+  });
+  if (error) throw error;
+  return (data as DiscoverProfile[]) ?? [];
+}
+
+// --- Birth Club (doğum-ayı kohort grupları, Faz 2.4) ---
+
+// Bebek doğum tarihinden kohort anahtarı "YYYY-MM"
+export function babyCohort(birthDate: string): string {
+  return birthDate.slice(0, 7); // ISO 'YYYY-MM-DD' → 'YYYY-MM'
+}
+
+// Kohort için okunabilir başlık, "March 2026 Birth Club" / "Mart 2026 Doğum Kulübü"
+export function birthClubTitle(cohort: string, lang: Lang): string {
+  const [y, m] = cohort.split("-").map(Number);
+  const localeMap: Record<Lang, string> = {
+    en: "en-US",
+    tr: "tr-TR",
+    es: "es-ES",
+    fr: "fr-FR",
+    de: "de-DE",
+  };
+  const monthName = new Date(y, (m || 1) - 1, 1).toLocaleString(
+    localeMap[lang] || "en-US",
+    { month: "long" }
+  );
+  const suffix = lang === "tr" ? "Doğum Kulübü" : "Birth Club";
+  return `${monthName} ${y} ${suffix}`;
+}
+
+// Kullanıcının kohort odasını bul/oluştur, oda id'sini döndür.
+export async function getOrCreateBirthClub(
+  userId: string,
+  cohort: string,
+  title: string
+): Promise<string | null> {
+  const { data, error } = await supabase.rpc("get_or_create_birth_club", {
+    p_owner: userId,
+    p_cohort: cohort,
+    p_title: title,
+  });
+  if (error) throw error;
+  return (data as string) ?? null;
+}
+
+// --- Connections (Arkadaşlık) ---
+
+export type ConnectionStatus = "pending" | "accepted";
+
+export type Connection = {
+  id: string;
+  requester_id: string;
+  addressee_id: string;
+  status: ConnectionStatus;
+  created_at: string;
+  updated_at: string;
+  profiles?: { username: string | null; full_name: string | null; avatar_url: string | null };
+};
+
+export type ConnectionState = "none" | "friends" | "request_sent" | "request_received";
+
+const connectionProfileSelect =
+  "id, requester_id, addressee_id, status, created_at, updated_at";
+
+// Arkadaşlık isteği gönder
+export async function sendConnectionRequest(requesterId: string, addresseeId: string) {
+  const { error } = await supabase.from("connections").insert({
+    requester_id: requesterId,
+    addressee_id: addresseeId,
+    status: "pending",
+  });
+  if (error) throw error;
+  // Push bildirimi (best-effort — bildirim başarısızlığı isteği bozmasın)
+  try {
+    const { notifyConnectionRequest } = await import("./api/push.functions");
+    await notifyConnectionRequest({ data: { requesterId, addresseeId } });
+  } catch (e) {
+    console.warn("notifyConnectionRequest başarısız:", e);
+  }
+}
+
+// Gelen isteği kabul et
+export async function acceptConnectionRequest(connectionId: string) {
+  const { error } = await supabase
+    .from("connections")
+    .update({ status: "accepted", updated_at: new Date().toISOString() })
+    .eq("id", connectionId);
+  if (error) throw error;
+  try {
+    const { notifyConnectionAccepted } = await import("./api/push.functions");
+    await notifyConnectionAccepted({ data: { connectionId } });
+  } catch (e) {
+    console.warn("notifyConnectionAccepted başarısız:", e);
+  }
+}
+
+// İsteği reddet / arkadaşlığı kaldır / isteği geri çek
+export async function removeConnection(connectionId: string) {
+  const { error } = await supabase.from("connections").delete().eq("id", connectionId);
+  if (error) throw error;
+}
+
+// Kabul edilmiş arkadaşların profil bilgileri (karşı taraf)
+export async function getFriends(userId: string): Promise<
+  { connectionId: string; profile: Profile }[]
+> {
+  const { data } = await supabase
+    .from("connections")
+    .select(`${connectionProfileSelect}`)
+    .eq("status", "accepted")
+    .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
+
+  const conns = (data as Connection[]) ?? [];
+  if (conns.length === 0) return [];
+
+  // Karşı tarafların profillerini topla
+  const otherIds = conns.map((c) =>
+    c.requester_id === userId ? c.addressee_id : c.requester_id
+  );
+  const { data: profilesData } = await supabase
+    .from("profiles")
+    .select("*")
+    .in("id", otherIds);
+
+  const profileMap = new Map((profilesData as Profile[] ?? []).map((p) => [p.id, p]));
+  return conns
+    .map((c) => {
+      const otherId = c.requester_id === userId ? c.addressee_id : c.requester_id;
+      const profile = profileMap.get(otherId);
+      return profile ? { connectionId: c.id, profile } : null;
+    })
+    .filter((x): x is { connectionId: string; profile: Profile } => x !== null);
+}
+
+// Bana gelen bekleyen istekler (gönderenin profiliyle)
+export async function getIncomingRequests(userId: string): Promise<
+  { connectionId: string; profile: Profile }[]
+> {
+  const { data } = await supabase
+    .from("connections")
+    .select(connectionProfileSelect)
+    .eq("status", "pending")
+    .eq("addressee_id", userId);
+
+  const conns = (data as Connection[]) ?? [];
+  if (conns.length === 0) return [];
+
+  const { data: profilesData } = await supabase
+    .from("profiles")
+    .select("*")
+    .in("id", conns.map((c) => c.requester_id));
+
+  const profileMap = new Map((profilesData as Profile[] ?? []).map((p) => [p.id, p]));
+  return conns
+    .map((c) => {
+      const profile = profileMap.get(c.requester_id);
+      return profile ? { connectionId: c.id, profile } : null;
+    })
+    .filter((x): x is { connectionId: string; profile: Profile } => x !== null);
+}
+
+// İki kullanıcı arasındaki ilişki durumu (profil sayfasında buton için)
+export async function getConnectionState(
+  userId: string,
+  otherUserId: string
+): Promise<{ state: ConnectionState; connectionId: string | null }> {
+  const { data } = await supabase
+    .from("connections")
+    .select(connectionProfileSelect)
+    .or(
+      `and(requester_id.eq.${userId},addressee_id.eq.${otherUserId}),and(requester_id.eq.${otherUserId},addressee_id.eq.${userId})`
+    )
+    .maybeSingle();
+
+  const conn = data as Connection | null;
+  if (!conn) return { state: "none", connectionId: null };
+  if (conn.status === "accepted") return { state: "friends", connectionId: conn.id };
+  // pending
+  if (conn.requester_id === userId) return { state: "request_sent", connectionId: conn.id };
+  return { state: "request_received", connectionId: conn.id };
+}
+
+// --- Posts (Paylaşım Akışı) ---
+
+export type PostVisibility = "public" | "friends" | "private";
+
+export type Post = {
+  id: string;
+  user_id: string;
+  content: string;
+  image_url: string | null;
+  visibility: PostVisibility;
+  created_at: string;
+  updated_at: string;
+  profiles?: { username: string | null; full_name: string | null; avatar_url: string | null };
+};
+
+export async function createPost(
+  userId: string,
+  content: string,
+  visibility: PostVisibility,
+  imageUrl?: string | null
+) {
+  const { error } = await supabase.from("posts").insert({
+    user_id: userId,
+    content,
+    visibility,
+    image_url: imageUrl ?? null,
+  });
+  if (error) throw error;
+}
+
+// Akış: RLS sayesinde sadece görmeye yetkili olduğun paylaşımlar gelir
+export async function getFeed(limit = 50): Promise<Post[]> {
+  const { data } = await supabase
+    .from("posts")
+    .select("*, profiles(username, full_name, avatar_url)")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return (data as Post[]) ?? [];
+}
+
+export async function getUserPosts(userId: string): Promise<Post[]> {
+  const { data } = await supabase
+    .from("posts")
+    .select("*, profiles(username, full_name, avatar_url)")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  return (data as Post[]) ?? [];
+}
+
+export async function updatePost(postId: string, updates: Partial<Pick<Post, "content" | "visibility" | "image_url">>) {
+  const { error } = await supabase
+    .from("posts")
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq("id", postId);
+  if (error) throw error;
+}
+
+export async function deletePost(postId: string) {
+  const { error } = await supabase.from("posts").delete().eq("id", postId);
+  if (error) throw error;
+}
+
+// --- AI Assistant (Yanında) ---
+
+export type AiMode = "support" | "couples_bridge";
+
+export type AiConversation = {
+  id: string;
+  user_id: string;
+  mode: AiMode;
+  title: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AiMessage = {
+  id: string;
+  conversation_id: string;
+  user_id: string;
+  role: "user" | "assistant";
+  content: string;
+  meta: Record<string, unknown> | null;
+  created_at: string;
+};
+
+export async function createConversation(
+  userId: string,
+  mode: AiMode,
+  title?: string
+): Promise<AiConversation> {
+  const { data, error } = await supabase
+    .from("ai_conversations")
+    .insert({ user_id: userId, mode, title: title ?? null })
+    .select()
+    .single();
+  if (error) throw error;
+  return data as AiConversation;
+}
+
+export async function getConversations(userId: string): Promise<AiConversation[]> {
+  const { data } = await supabase
+    .from("ai_conversations")
+    .select("*")
+    .eq("user_id", userId)
+    .order("updated_at", { ascending: false });
+  return (data as AiConversation[]) ?? [];
+}
+
+export async function getConversationMessages(conversationId: string): Promise<AiMessage[]> {
+  const { data } = await supabase
+    .from("ai_messages")
+    .select("*")
+    .eq("conversation_id", conversationId)
+    .order("created_at", { ascending: true });
+  return (data as AiMessage[]) ?? [];
+}
+
+export async function addAiMessage(
+  conversationId: string,
+  userId: string,
+  role: "user" | "assistant",
+  content: string,
+  meta?: Record<string, unknown>
+): Promise<AiMessage> {
+  const { data, error } = await supabase
+    .from("ai_messages")
+    .insert({ conversation_id: conversationId, user_id: userId, role, content, meta: meta ?? null })
+    .select()
+    .single();
+  if (error) throw error;
+  // sohbetin updated_at'ini tazele (sıralama için)
+  await supabase
+    .from("ai_conversations")
+    .update({ updated_at: new Date().toISOString() })
+    .eq("id", conversationId);
+  return data as AiMessage;
+}
+
+export async function deleteConversation(conversationId: string) {
+  const { error } = await supabase.from("ai_conversations").delete().eq("id", conversationId);
+  if (error) throw error;
+}
+
+// --- Push Subscriptions ---
+
+export async function savePushSubscription(
+  userId: string,
+  sub: { endpoint: string; p256dh: string; auth: string; user_agent?: string }
+) {
+  const { error } = await supabase.from("push_subscriptions").upsert(
+    {
+      user_id: userId,
+      endpoint: sub.endpoint,
+      p256dh: sub.p256dh,
+      auth: sub.auth,
+      user_agent: sub.user_agent ?? null,
+    },
+    { onConflict: "endpoint" }
+  );
+  if (error) throw error;
+}
+
+export async function deletePushSubscription(userId: string, endpoint: string) {
+  const { error } = await supabase
+    .from("push_subscriptions")
+    .delete()
+    .eq("user_id", userId)
+    .eq("endpoint", endpoint);
+  if (error) throw error;
 }

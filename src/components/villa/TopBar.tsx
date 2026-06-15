@@ -1,10 +1,11 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { Sun, Moon, Droplet, Shield, User, LogIn, LogOut, Settings, LayoutDashboard } from "lucide-react";
+import { Sun, Moon, Droplet, Shield, User, LogIn, LogOut, Settings, LayoutDashboard, Newspaper, Users, Sparkles, Compass } from "lucide-react";
 import { useApp } from "@/lib/store";
 import { Logo } from "./Logo";
-import { useLang, setLang, type Lang } from "@/lib/i18n";
+import { useLang, setLang, useT, type Lang } from "@/lib/i18n";
 import { getCurrentUser, signOut, getProfile, type Profile } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
 
 const languages: { code: Lang; label: string }[] = [
   { code: "en", label: "EN" },
@@ -14,6 +15,7 @@ const languages: { code: Lang; label: string }[] = [
 export function TopBar() {
   const { theme, toggleTheme, softer, toggleSofter } = useApp();
   const lang = useLang();
+  const t = useT();
   const navigate = useNavigate();
   const [langOpen, setLangOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -21,12 +23,34 @@ export function TopBar() {
   const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
-    getCurrentUser().then((u) => {
+    let mounted = true;
+
+    async function loadUser(u: { id: string; email?: string } | null) {
+      if (!mounted) return;
       if (u) {
         setUser(u);
-        getProfile(u.id).then(setProfile);
+        const p = await getProfile(u.id);
+        if (mounted) setProfile(p);
+      } else {
+        setUser(null);
+        setProfile(null);
       }
+    }
+
+    // İlk yükleme
+    getCurrentUser().then(loadUser);
+
+    // Oturum değişimlerini canlı dinle (login/logout sonrası menü anında güncellensin)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      loadUser(session?.user ?? null);
     });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   async function handleSignOut() {
@@ -120,11 +144,46 @@ export function TopBar() {
                         <User className="h-4 w-4" /> Profile
                       </Link>
                       <Link
+                        to="/auth/assistant"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-accent hover:bg-secondary/40"
+                      >
+                        <Sparkles className="h-4 w-4" /> {t("nav.assistant") || "Yanında"}
+                      </Link>
+                      <Link
+                        to="/auth/feed"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
+                      >
+                        <Newspaper className="h-4 w-4" /> {t("nav.feed") || "Feed"}
+                      </Link>
+                      <Link
+                        to="/auth/friends"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
+                      >
+                        <Users className="h-4 w-4" /> {t("nav.friends") || "Friends"}
+                      </Link>
+                      <Link
+                        to="/auth/discover"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
+                      >
+                        <Compass className="h-4 w-4" /> {t("nav.discover") || "Discover"}
+                      </Link>
+                      <Link
                         to="/auth/community"
                         onClick={() => setUserMenuOpen(false)}
                         className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
                       >
                         <Settings className="h-4 w-4" /> Community
+                      </Link>
+                      <Link
+                        to="/auth/settings"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
+                      >
+                        <Settings className="h-4 w-4" /> {t("settings.title") || "Settings"}
                       </Link>
                       {profile?.is_admin && (
                         <Link
