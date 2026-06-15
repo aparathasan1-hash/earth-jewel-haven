@@ -11,6 +11,9 @@
     "lint": "eslint .",
     "format": "prettier --write ."
   },
+  "overrides": {
+    "rollup": "npm:@rollup/wasm-node@4.62.0"
+  },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",
     "@hookform/resolvers": "^5.4.0",
