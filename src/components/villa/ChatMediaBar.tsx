@@ -78,6 +78,25 @@ export function ChatMediaBar({
 
   async function startRecording(kind: "audio" | "video") {
     if (disabled || busy) return;
+
+    // Kamera/mikrofon yalnız güvenli bağlamda (HTTPS veya localhost) çalışır.
+    // Telefondan HTTP üzerinden LAN IP'ye bağlanınca mediaDevices tanımsız olur.
+    const secure =
+      typeof window !== "undefined" &&
+      (window.isSecureContext ||
+        ["localhost", "127.0.0.1"].includes(window.location.hostname));
+    if (!secure || !navigator.mediaDevices?.getUserMedia) {
+      toast.error(
+        t("chat.insecureContext") ||
+          "Recording needs a secure connection (https). Image sending still works."
+      );
+      return;
+    }
+    if (typeof MediaRecorder === "undefined") {
+      toast.error(t("chat.unsupported") || "Your browser does not support recording.");
+      return;
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia(
         kind === "video" ? { video: { facingMode: "user" }, audio: true } : { audio: true }
@@ -127,7 +146,21 @@ export function ChatMediaBar({
       console.error("getUserMedia error:", err);
       cleanupStream();
       setMode("idle");
-      toast.error(t("chat.permissionDenied") || "Microphone/camera access was denied.");
+      const name = (err as { name?: string })?.name;
+      let msg: string;
+      if (name === "NotAllowedError" || name === "SecurityError") {
+        msg = t("chat.permissionDenied") || "Microphone/camera access was denied.";
+      } else if (name === "NotFoundError" || name === "OverconstrainedError") {
+        msg =
+          kind === "video"
+            ? t("chat.noCamera") || "No camera found on this device."
+            : t("chat.noMic") || "No microphone found on this device.";
+      } else if (name === "NotReadableError") {
+        msg = t("chat.deviceBusy") || "Camera/microphone is in use by another app.";
+      } else {
+        msg = t("chat.recordError") || "Could not start recording.";
+      }
+      toast.error(msg);
     }
   }
 
