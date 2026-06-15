@@ -97,6 +97,38 @@ export function ChatMediaBar({
       return;
     }
 
+    // Önizleme/iframe içinde kamera-mikrofon, üst çerçeve allow vermediği sürece
+    // prompt göstermeden reddedilir. Tam sekmede açmaya yönlendir.
+    const inIframe = (() => {
+      try {
+        return window.self !== window.top;
+      } catch {
+        return true;
+      }
+    })();
+
+    // İzin durumu zaten 'denied' ise tarayıcı tekrar prompt GÖSTERMEZ — net yönlendir.
+    try {
+      const perm = (navigator as Navigator & { permissions?: Permissions }).permissions;
+      if (perm?.query) {
+        const name = (kind === "video" ? "camera" : "microphone") as PermissionName;
+        const status = await perm.query({ name });
+        if (status.state === "denied") {
+          toast.error(
+            inIframe
+              ? t("chat.iframeBlocked") ||
+                  "Open the app in a full browser tab to record (the preview frame blocks camera/mic)."
+              : t("chat.permissionDenied") ||
+                  "Microphone/camera access was denied. Allow it in your browser's site settings.",
+            { duration: 7000 }
+          );
+          return;
+        }
+      }
+    } catch {
+      /* Permissions API yoksa doğrudan getUserMedia dener (prompt o sırada çıkar) */
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia(
         kind === "video" ? { video: { facingMode: "user" }, audio: true } : { audio: true }
@@ -149,7 +181,10 @@ export function ChatMediaBar({
       const name = (err as { name?: string })?.name;
       let msg: string;
       if (name === "NotAllowedError" || name === "SecurityError") {
-        msg = t("chat.permissionDenied") || "Microphone/camera access was denied.";
+        msg = inIframe
+          ? t("chat.iframeBlocked") ||
+            "Open the app in a full browser tab to record (the preview frame blocks camera/mic)."
+          : t("chat.permissionDenied") || "Microphone/camera access was denied.";
       } else if (name === "NotFoundError" || name === "OverconstrainedError") {
         msg =
           kind === "video"

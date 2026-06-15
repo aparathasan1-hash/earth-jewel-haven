@@ -565,6 +565,7 @@
     "maxLen": "En fazla 60 saniye.",
     "permissionDenied": "Mikrofon/kamera erişimi reddedildi. Tarayıcı site ayarlarından izin ver.",
     "insecureContext": "Kayıt için güvenli bağlantı (https) gerekir. Fotoğraf gönderimi yine de çalışır.",
+    "iframeBlocked": "Kayıt için uygulamayı tam bir tarayıcı sekmesinde aç — önizleme penceresi kamera/mikrofonu engelliyor.",
     "unsupported": "Tarayıcın kayıt özelliğini desteklemiyor.",
     "noCamera": "Bu cihazda kamera bulunamadı.",
     "noMic": "Bu cihazda mikrofon bulunamadı.",

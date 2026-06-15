@@ -568,6 +568,7 @@
     "maxLen": "Up to 60 seconds.",
     "permissionDenied": "Microphone/camera access was denied. Allow it in your browser's site settings.",
     "insecureContext": "Recording needs a secure connection (https). Image sending still works.",
+    "iframeBlocked": "Open the app in a full browser tab to record — the preview window blocks the camera/mic.",
     "unsupported": "Your browser does not support recording.",
     "noCamera": "No camera found on this device.",
     "noMic": "No microphone found on this device.",
