@@ -21,6 +21,14 @@
     "privacy": "Gizlilik ve Veri Politikası",
     "guidelines": "Topluluk Kuralları"
   },
+  "notif": {
+    "title": "Bildirimler",
+    "empty": "Henüz bildirim yok 🌿",
+    "now": "şimdi",
+    "min": "dk",
+    "hour": "sa",
+    "day": "g"
+  },
   "home": {
     "eyebrow": "Bir yol arkadaşı · usulca kuruldu",
     "heading": "Kağıttan bir köy,\nsenin için örüldü.",

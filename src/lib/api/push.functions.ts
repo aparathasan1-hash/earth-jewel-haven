@@ -85,6 +85,27 @@ async function displayName(
   return (data?.full_name as string) || (data?.username as string) || "Biri";
 }
 
+type NotifType = "friend_request" | "friend_accept" | "room_message" | "live_started";
+
+// Uygulama içi bildirim oluştur (service_role → RLS bypass). Push ile birlikte çağrılır.
+async function createNotif(
+  supabase: NonNullable<Awaited<ReturnType<typeof getServiceClient>>>,
+  n: { userId: string; actorId?: string; type: NotifType; title: string; body?: string; link?: string }
+) {
+  try {
+    await supabase.from("notifications").insert({
+      user_id: n.userId,
+      actor_id: n.actorId ?? null,
+      type: n.type,
+      title: n.title,
+      body: n.body ?? null,
+      link: n.link ?? null,
+    });
+  } catch (e) {
+    console.warn("createNotif başarısız:", e);
+  }
+}
+
 /** Arkadaşlık isteği gönderilince addressee'ye bildirim. Sunucu, pending kaydı doğrular. */
 export const notifyConnectionRequest = createServerFn({ method: "POST" })
   .inputValidator(z.object({ requesterId: z.string().uuid(), addresseeId: z.string().uuid() }))
@@ -100,6 +121,14 @@ export const notifyConnectionRequest = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!conn) return { sent: 0, configured: true }; // doğrulanamadı → gönderme
     const name = await displayName(supabase, data.requesterId);
+    await createNotif(supabase, {
+      userId: data.addresseeId,
+      actorId: data.requesterId,
+      type: "friend_request",
+      title: "Yeni arkadaşlık isteği 🌿",
+      body: `${name} sana arkadaşlık isteği gönderdi`,
+      link: "/auth/friends",
+    });
     return await sendPushToUser(data.addresseeId, {
       title: "Yeni arkadaşlık isteği 🌿",
       body: `${name} sana arkadaşlık isteği gönderdi`,
@@ -142,15 +171,71 @@ export const notifyRoomMessage = createServerFn({ method: "POST" })
     if (participantIds.length === 0) return { sent: 0, configured: true };
 
     const name = await displayName(supabase, data.senderId);
+    const link = `/auth/community?roomId=${data.roomId}`;
     const results = await Promise.all(
-      participantIds.map((id) =>
-        sendPushToUser(id, {
+      participantIds.map(async (id) => {
+        await createNotif(supabase, {
+          userId: id,
+          actorId: data.senderId,
+          type: "room_message",
           title: `${roomTitle} 🌿`,
           body: `${name}: ${data.preview}`,
-          url: "/auth/community",
+          link,
+        });
+        return sendPushToUser(id, {
+          title: `${roomTitle} 🌿`,
+          body: `${name}: ${data.preview}`,
+          url: link,
           tag: `room-${data.roomId}`,
-        })
+        });
+      })
+    );
+    return { sent: results.reduce((a, r) => a + r.sent, 0), configured: true };
+  });
+
+/**
+ * Bir kullanıcı canlı yayın açınca ARKADAŞLARINA bildirim (in-app + push).
+ * Sunucu yayını ve host'u doğrular; arkadaşları connections'tan bulur.
+ */
+export const notifyLiveStarted = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ streamId: z.string().uuid(), hostId: z.string().uuid() }))
+  .handler(async ({ data }) => {
+    const supabase = await getServiceClient();
+    if (!supabase) return { sent: 0, configured: false };
+
+    const { data: stream } = await supabase
+      .from("live_streams")
+      .select("title, host_id, status, is_private")
+      .eq("id", data.streamId)
+      .maybeSingle();
+    if (!stream || stream.host_id !== data.hostId || stream.status !== "live" || stream.is_private) {
+      return { sent: 0, configured: true };
+    }
+
+    // Host'un kabul edilmiş arkadaşları
+    const { data: conns } = await supabase
+      .from("connections")
+      .select("requester_id, addressee_id")
+      .eq("status", "accepted")
+      .or(`requester_id.eq.${data.hostId},addressee_id.eq.${data.hostId}`);
+    const friendIds = Array.from(
+      new Set(
+        ((conns as { requester_id: string; addressee_id: string }[]) ?? []).map((c) =>
+          c.requester_id === data.hostId ? c.addressee_id : c.requester_id
+        )
       )
+    );
+    if (friendIds.length === 0) return { sent: 0, configured: true };
+
+    const name = await displayName(supabase, data.hostId);
+    const link = `/auth/watch/${data.streamId}`;
+    const title = `${name} canlı yayında 🔴`;
+    const body = (stream.title as string) || "Şimdi izle";
+    const results = await Promise.all(
+      friendIds.map(async (id) => {
+        await createNotif(supabase, { userId: id, actorId: data.hostId, type: "live_started", title, body, link });
+        return sendPushToUser(id, { title, body, url: link, tag: `live-${data.streamId}` });
+      })
     );
     return { sent: results.reduce((a, r) => a + r.sent, 0), configured: true };
   });
@@ -168,6 +253,14 @@ export const notifyConnectionAccepted = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!conn || conn.status !== "accepted") return { sent: 0, configured: true };
     const name = await displayName(supabase, conn.addressee_id as string);
+    await createNotif(supabase, {
+      userId: conn.requester_id as string,
+      actorId: conn.addressee_id as string,
+      type: "friend_accept",
+      title: "Arkadaşlık kabul edildi 🌿",
+      body: `${name} arkadaşlık isteğini kabul etti`,
+      link: "/auth/friends",
+    });
     return await sendPushToUser(conn.requester_id as string, {
       title: "Arkadaşlık kabul edildi 🌿",
       body: `${name} arkadaşlık isteğini kabul etti`,

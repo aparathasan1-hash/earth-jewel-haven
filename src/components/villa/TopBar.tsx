@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Sun, Moon, Droplet, Shield, User, LogIn, LogOut, Settings, LayoutDashboard, Newspaper, Users, Sparkles, Compass, Radio } from "lucide-react";
 import { useApp } from "@/lib/store";
 import { Logo } from "./Logo";
+import { NotificationBell } from "./NotificationBell";
 import { useLang, setLang, useT, type Lang } from "@/lib/i18n";
 import { getCurrentUser, signOut, getProfile, type Profile } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
@@ -116,6 +117,9 @@ export function TopBar() {
           >
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
+
+          {/* Notifications */}
+          {user && <NotificationBell userId={user.id} />}
 
           {/* User menu */}
           <div className="relative">

@@ -947,6 +947,47 @@ export async function updateNotificationPreferences(
   if (error) throw error;
 }
 
+// --- Bildirim Merkezi ---
+
+export type AppNotification = {
+  id: string;
+  user_id: string;
+  actor_id: string | null;
+  type: "friend_request" | "friend_accept" | "room_message" | "live_started";
+  title: string;
+  body: string | null;
+  link: string | null;
+  read: boolean;
+  created_at: string;
+};
+
+export async function getNotifications(userId: string, limit = 30): Promise<AppNotification[]> {
+  const { data } = await supabase
+    .from("notifications")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return (data as AppNotification[]) ?? [];
+}
+
+export async function getUnreadCount(userId: string): Promise<number> {
+  const { count } = await supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("read", false);
+  return count ?? 0;
+}
+
+export async function markAllNotificationsRead(userId: string) {
+  await supabase.from("notifications").update({ read: true }).eq("user_id", userId).eq("read", false);
+}
+
+export async function deleteNotification(id: string) {
+  await supabase.from("notifications").delete().eq("id", id);
+}
+
 // --- Onboarding & Keşif (Faz 2) ---
 
 export type OnboardingState = {
@@ -1047,7 +1088,15 @@ export async function startStream(
     .select(streamHostSelect)
     .single();
   if (error) throw error;
-  return data as LiveStream;
+  const stream = data as LiveStream;
+  // Arkadaşlara "canlı yayında" bildirimi (best-effort)
+  try {
+    const { notifyLiveStarted } = await import("./api/push.functions");
+    await notifyLiveStarted({ data: { streamId: stream.id, hostId } });
+  } catch (e) {
+    console.warn("notifyLiveStarted başarısız:", e);
+  }
+  return stream;
 }
 
 // Yayını bitir (sahibi: 'host'; admin kill-switch: 'admin')
