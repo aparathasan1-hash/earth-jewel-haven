@@ -16,6 +16,11 @@
     "live": "Canlı",
     "assistant": "Yanında"
   },
+  "legal": {
+    "terms": "Kullanım Şartları",
+    "privacy": "Gizlilik ve Veri Politikası",
+    "guidelines": "Topluluk Kuralları"
+  },
   "home": {
     "eyebrow": "Bir yol arkadaşı · usulca kuruldu",
     "heading": "Kağıttan bir köy,\nsenin için örüldü.",

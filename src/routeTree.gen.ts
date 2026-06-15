@@ -10,8 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VaultRouteImport } from './routes/vault'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as StagesRouteImport } from './routes/stages'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as DataPolicyRouteImport } from './routes/data-policy'
+import { Route as CommunityGuidelinesRouteImport } from './routes/community-guidelines'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StagesSupportRouteImport } from './routes/stages.support'
 import { Route as StagesRecoveryRouteImport } from './routes/stages.recovery'
@@ -47,6 +50,11 @@ const VaultRoute = VaultRouteImport.update({
   path: '/vault',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StagesRoute = StagesRouteImport.update({
   id: '/stages',
   path: '/stages',
@@ -55,6 +63,16 @@ const StagesRoute = StagesRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DataPolicyRoute = DataPolicyRouteImport.update({
+  id: '/data-policy',
+  path: '/data-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityGuidelinesRoute = CommunityGuidelinesRouteImport.update({
+  id: '/community-guidelines',
+  path: '/community-guidelines',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -205,8 +223,11 @@ const AuthBabyIdRoute = AuthBabyIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/community-guidelines': typeof CommunityGuidelinesRoute
+  '/data-policy': typeof DataPolicyRoute
   '/privacy': typeof PrivacyRoute
   '/stages': typeof StagesRouteWithChildren
+  '/terms': typeof TermsRoute
   '/vault': typeof VaultRoute
   '/auth/admin': typeof AuthAdminRoute
   '/auth/assistant': typeof AuthAssistantRoute
@@ -239,8 +260,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/community-guidelines': typeof CommunityGuidelinesRoute
+  '/data-policy': typeof DataPolicyRoute
   '/privacy': typeof PrivacyRoute
   '/stages': typeof StagesRouteWithChildren
+  '/terms': typeof TermsRoute
   '/vault': typeof VaultRoute
   '/auth/admin': typeof AuthAdminRoute
   '/auth/assistant': typeof AuthAssistantRoute
@@ -274,8 +298,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/community-guidelines': typeof CommunityGuidelinesRoute
+  '/data-policy': typeof DataPolicyRoute
   '/privacy': typeof PrivacyRoute
   '/stages': typeof StagesRouteWithChildren
+  '/terms': typeof TermsRoute
   '/vault': typeof VaultRoute
   '/auth/admin': typeof AuthAdminRoute
   '/auth/assistant': typeof AuthAssistantRoute
@@ -310,8 +337,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/community-guidelines'
+    | '/data-policy'
     | '/privacy'
     | '/stages'
+    | '/terms'
     | '/vault'
     | '/auth/admin'
     | '/auth/assistant'
@@ -344,8 +374,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/community-guidelines'
+    | '/data-policy'
     | '/privacy'
     | '/stages'
+    | '/terms'
     | '/vault'
     | '/auth/admin'
     | '/auth/assistant'
@@ -378,8 +411,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/community-guidelines'
+    | '/data-policy'
     | '/privacy'
     | '/stages'
+    | '/terms'
     | '/vault'
     | '/auth/admin'
     | '/auth/assistant'
@@ -413,8 +449,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CommunityGuidelinesRoute: typeof CommunityGuidelinesRoute
+  DataPolicyRoute: typeof DataPolicyRoute
   PrivacyRoute: typeof PrivacyRoute
   StagesRoute: typeof StagesRouteWithChildren
+  TermsRoute: typeof TermsRoute
   VaultRoute: typeof VaultRoute
   AuthAdminRoute: typeof AuthAdminRoute
   AuthAssistantRoute: typeof AuthAssistantRoute
@@ -449,6 +488,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VaultRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stages': {
       id: '/stages'
       path: '/stages'
@@ -461,6 +507,20 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/data-policy': {
+      id: '/data-policy'
+      path: '/data-policy'
+      fullPath: '/data-policy'
+      preLoaderRoute: typeof DataPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community-guidelines': {
+      id: '/community-guidelines'
+      path: '/community-guidelines'
+      fullPath: '/community-guidelines'
+      preLoaderRoute: typeof CommunityGuidelinesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -692,8 +752,11 @@ const StagesRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CommunityGuidelinesRoute: CommunityGuidelinesRoute,
+  DataPolicyRoute: DataPolicyRoute,
   PrivacyRoute: PrivacyRoute,
   StagesRoute: StagesRouteWithChildren,
+  TermsRoute: TermsRoute,
   VaultRoute: VaultRoute,
   AuthAdminRoute: AuthAdminRoute,
   AuthAssistantRoute: AuthAssistantRoute,

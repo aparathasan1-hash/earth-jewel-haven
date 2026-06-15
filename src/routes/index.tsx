@@ -184,6 +184,17 @@ function Landing() {
             {t("home.privacyLink")}
           </Link>
         </p>
+        <nav className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+          <Link to="/terms" className="hover:text-foreground hover:underline underline-offset-4">
+            {t("legal.terms") || "Terms of Service"}
+          </Link>
+          <Link to="/data-policy" className="hover:text-foreground hover:underline underline-offset-4">
+            {t("legal.privacy") || "Privacy & Data Policy"}
+          </Link>
+          <Link to="/community-guidelines" className="hover:text-foreground hover:underline underline-offset-4">
+            {t("legal.guidelines") || "Community Guidelines"}
+          </Link>
+        </nav>
       </footer>
     </div>
   );

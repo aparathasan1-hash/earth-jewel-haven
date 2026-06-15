@@ -16,6 +16,11 @@
     "live": "Live",
     "assistant": "Yanında"
   },
+  "legal": {
+    "terms": "Terms of Service",
+    "privacy": "Privacy & Data Policy",
+    "guidelines": "Community Guidelines"
+  },
   "home": {
     "eyebrow": "A companion · est. softly",
     "heading": "A village made of paper,\nmade for you.",
