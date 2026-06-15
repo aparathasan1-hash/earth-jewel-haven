@@ -624,6 +624,90 @@ export async function deleteBabyMeasurement(measurementId: string) {
   if (error) throw error;
 }
 
+// --- Beslenme & Uyku Takibi (Faz 4B) ---
+
+export type FeedingLog = {
+  id: string;
+  baby_id: string;
+  logged_at: string;
+  kind: "breast" | "bottle" | "solid";
+  amount_ml: number | null;
+  duration_min: number | null;
+  note: string | null;
+  created_at: string;
+};
+
+export type SleepLog = {
+  id: string;
+  baby_id: string;
+  start_at: string;
+  end_at: string | null;
+  note: string | null;
+  created_at: string;
+};
+
+export async function getFeedingLogs(babyId: string, limit = 50): Promise<FeedingLog[]> {
+  const { data } = await supabase
+    .from("baby_feeding_logs")
+    .select("*")
+    .eq("baby_id", babyId)
+    .order("logged_at", { ascending: false })
+    .limit(limit);
+  return (data as FeedingLog[]) ?? [];
+}
+
+export async function saveFeedingLog(log: {
+  baby_id: string;
+  kind: "breast" | "bottle" | "solid";
+  amount_ml?: number | null;
+  duration_min?: number | null;
+  note?: string | null;
+  logged_at?: string;
+}) {
+  const { error } = await supabase.from("baby_feeding_logs").insert(log);
+  if (error) throw error;
+}
+
+export async function deleteFeedingLog(id: string) {
+  const { error } = await supabase.from("baby_feeding_logs").delete().eq("id", id);
+  if (error) throw error;
+}
+
+export async function getSleepLogs(babyId: string, limit = 50): Promise<SleepLog[]> {
+  const { data } = await supabase
+    .from("baby_sleep_logs")
+    .select("*")
+    .eq("baby_id", babyId)
+    .order("start_at", { ascending: false })
+    .limit(limit);
+  return (data as SleepLog[]) ?? [];
+}
+
+// Uyku başlat (end_at null) → açık uyku kaydı döndür
+export async function startSleepLog(babyId: string): Promise<SleepLog> {
+  const { data, error } = await supabase
+    .from("baby_sleep_logs")
+    .insert({ baby_id: babyId })
+    .select("*")
+    .single();
+  if (error) throw error;
+  return data as SleepLog;
+}
+
+// Açık uyku kaydını bitir
+export async function endSleepLog(id: string) {
+  const { error } = await supabase
+    .from("baby_sleep_logs")
+    .update({ end_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteSleepLog(id: string) {
+  const { error } = await supabase.from("baby_sleep_logs").delete().eq("id", id);
+  if (error) throw error;
+}
+
 // --- Anniversary Badges ---
 
 export async function getAnniversaryBadges(): Promise<AnniversaryBadge[]> {

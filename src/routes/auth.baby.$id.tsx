@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { ArrowLeft, Edit2, Loader2, Trash2, Plus, Heart, TrendingUp } from 'lucide-react'
+import { ArrowLeft, Edit2, Loader2, Trash2, Plus, Heart, TrendingUp, Moon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useT } from '@/lib/i18n'
 import {
@@ -17,6 +17,7 @@ import {
   type BabyMeasurement,
 } from '@/lib/auth'
 import { GrowthChart } from '@/components/villa/GrowthChart'
+import { CareTracker } from '@/components/villa/CareTracker'
 
 export const Route = createFileRoute('/auth/baby/$id')({
   head: () => ({
@@ -313,6 +314,14 @@ function BabyProfilePage() {
             ))}
           </div>
         )}
+      </section>
+
+      {/* Care tracking (feeding/sleep) */}
+      <section className="mt-8">
+        <h2 className="mb-4 flex items-center gap-2 font-serif text-lg">
+          <Moon className="h-5 w-5 text-accent" /> {t('care.title') || 'Feeding & Sleep'}
+        </h2>
+        <CareTracker babyId={baby.id} />
       </section>
 
       {/* Milestones */}

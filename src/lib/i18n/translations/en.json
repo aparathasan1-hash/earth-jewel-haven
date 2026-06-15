@@ -572,6 +572,22 @@
     "percentileLabel": "Around the {p} percentile 🌿",
     "growthDisclaimer": "WHO reference (0–24 mo). Informational only, not medical advice."
   },
+  "care": {
+    "title": "Feeding & Sleep",
+    "breast": "Breast",
+    "bottle": "Bottle",
+    "solid": "Solid",
+    "startSleep": "Sleep",
+    "wakeUp": "Woke up",
+    "sleepStarted": "Sleep started 🌙",
+    "sleepEnded": "Sleep ended 🌿",
+    "sleepingSince": "Sleeping since {time}",
+    "ongoing": "ongoing",
+    "feedsToday": "Feeds today",
+    "sleepToday": "Sleep today",
+    "logged": "Logged 🌿",
+    "error": "Could not log"
+  },
   "assistant": {
     "title": "Yanında",
     "error": "Something went wrong, want to try again? 🌿",

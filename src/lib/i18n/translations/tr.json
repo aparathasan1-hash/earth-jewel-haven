@@ -569,6 +569,22 @@
     "percentileLabel": "Yaklaşık {p} persentilde 🌿",
     "growthDisclaimer": "WHO referansı (0–24 ay). Bilgilendirme amaçlıdır, tıbbi tavsiye değildir."
   },
+  "care": {
+    "title": "Beslenme & Uyku",
+    "breast": "Emzirme",
+    "bottle": "Biberon",
+    "solid": "Mama",
+    "startSleep": "Uyku",
+    "wakeUp": "Uyandı",
+    "sleepStarted": "Uyku başladı 🌙",
+    "sleepEnded": "Uyku bitti 🌿",
+    "sleepingSince": "{time}'den beri uyuyor",
+    "ongoing": "sürüyor",
+    "feedsToday": "Bugün öğün",
+    "sleepToday": "Bugün uyku",
+    "logged": "Kaydedildi 🌿",
+    "error": "Kaydedilemedi"
+  },
   "assistant": {
     "title": "Yanında",
     "error": "Bir şeyler ters gitti, tekrar dener misin? 🌿",
