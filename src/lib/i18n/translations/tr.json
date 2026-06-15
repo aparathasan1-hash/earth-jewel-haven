@@ -14,6 +14,7 @@
     "friends": "Arkadaşlar",
     "discover": "Keşfet",
     "live": "Canlı",
+    "invite": "Davet et",
     "assistant": "Yanında"
   },
   "legal": {
@@ -537,6 +538,20 @@
     "sharedInterests": "ortak",
     "clubSubtitle": "Aynı ay doğum yapan annelere katıl",
     "clubError": "Doğum kulübün açılamadı"
+  },
+  "invite": {
+    "title": "Arkadaşlarını davet et",
+    "desc": "Linkini burada kendini evinde hissedecek annelerle paylaş. Onlar katıldığında köyü birlikte büyütürsünüz.",
+    "yourLink": "Davet linkin",
+    "copy": "Kopyala",
+    "copiedShort": "Kopyalandı",
+    "copied": "Link kopyalandı 🌿",
+    "share": "Paylaş",
+    "shareText": "Bana köyde katıl — lohusalık için sıcak bir yoldaş.",
+    "codeLabel": "Kodun",
+    "joined": "Senin davetinle katılanlar",
+    "empty": "Henüz kimse yok. Linkini paylaş, ilk anneyi karşıla.",
+    "aMother": "Bir anne"
   },
   "live": {
     "title": "Canlı",

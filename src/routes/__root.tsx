@@ -209,6 +209,31 @@ function OnboardingManager() {
   return null;
 }
 
+// E-posta onayından sonra taze yüklemede bekleyen davet kodunu kullanır.
+// (signup içindeki anlık redeem oturum hemen açılan akışı kapsar.)
+function ReferralManager() {
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const code = localStorage.getItem("pending_referral");
+        if (!code) return;
+        const user = await getCurrentUser();
+        if (!user || cancelled) return; // henüz giriş yok → kodu koru, sonra dener
+        localStorage.removeItem("pending_referral");
+        const { redeemReferral } = await import("../lib/auth");
+        await redeemReferral(code);
+      } catch (err) {
+        console.warn("Referral redeem error:", err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return null;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const [showSplash, setShowSplash] = useState(true);
@@ -217,6 +242,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ThemeSync />
       <OnboardingManager />
+      <ReferralManager />
       <DailyCheckInManager />
       <SecureLockReset />
       <Toaster

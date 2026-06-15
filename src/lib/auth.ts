@@ -1052,6 +1052,54 @@ export async function discoverProfiles(
   return (data as DiscoverProfile[]) ?? [];
 }
 
+// --- Davet / Referral (büyüme) ---
+
+export type ReferralEntry = {
+  id: string;
+  referred_id: string;
+  created_at: string;
+  profiles?: {
+    username: string | null;
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null;
+};
+
+// Giriş yapan kullanıcının davet kodunu döndürür (yoksa üretir).
+export async function getMyReferralCode(): Promise<string> {
+  const { data, error } = await supabase.rpc("get_or_create_my_referral_code");
+  if (error) throw error;
+  return data as string;
+}
+
+// Bu kullanıcının davetiyle katılanlar (profil bilgisiyle).
+export async function getMyReferrals(userId: string): Promise<ReferralEntry[]> {
+  const { data, error } = await supabase
+    .from("referrals")
+    .select("id, referred_id, created_at, profiles:referred_id(username, full_name, avatar_url)")
+    .eq("referrer_id", userId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data as unknown as ReferralEntry[]) ?? [];
+}
+
+// Davet kodunu kullan (yeni katılan çağırır). Davet edeni döndürür, yoksa null.
+// SECURITY DEFINER redeem_referral kendini-davet/çift-davet korumasını uygular.
+export async function redeemReferral(code: string): Promise<string | null> {
+  const { data, error } = await supabase.rpc("redeem_referral", { p_code: code });
+  if (error) throw error;
+  const referrerId = (data as string | null) ?? null;
+  if (referrerId) {
+    try {
+      const { notifyReferralJoined } = await import("./api/push.functions");
+      await notifyReferralJoined({ data: { referrerId } });
+    } catch (e) {
+      console.warn("notifyReferralJoined başarısız:", e);
+    }
+  }
+  return referrerId;
+}
+
 // --- Canlı Yayın (Live Streaming L1) ---
 
 export type LiveStream = {

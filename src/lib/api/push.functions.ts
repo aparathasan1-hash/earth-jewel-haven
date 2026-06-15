@@ -85,7 +85,7 @@ async function displayName(
   return (data?.full_name as string) || (data?.username as string) || "Biri";
 }
 
-type NotifType = "friend_request" | "friend_accept" | "room_message" | "live_started";
+type NotifType = "friend_request" | "friend_accept" | "room_message" | "live_started" | "referral_joined";
 
 // Uygulama içi bildirim oluştur (service_role → RLS bypass). Push ile birlikte çağrılır.
 async function createNotif(
@@ -238,6 +238,42 @@ export const notifyLiveStarted = createServerFn({ method: "POST" })
       })
     );
     return { sent: results.reduce((a, r) => a + r.sent, 0), configured: true };
+  });
+
+/**
+ * Davet edilen biri katılınca, davet edene bildirim (in-app + push).
+ * Sunucu, bu referrer'a ait en son referral kaydını okuyup davetliyi bildirir.
+ */
+export const notifyReferralJoined = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ referrerId: z.string().uuid() }))
+  .handler(async ({ data }) => {
+    const supabase = await getServiceClient();
+    if (!supabase) return { sent: 0, configured: false };
+    const { data: ref } = await supabase
+      .from("referrals")
+      .select("referred_id")
+      .eq("referrer_id", data.referrerId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!ref) return { sent: 0, configured: true };
+    const name = await displayName(supabase, ref.referred_id as string);
+    const title = "Davetin kabul edildi 🌱";
+    const body = `${name} davetinle aramıza katıldı`;
+    await createNotif(supabase, {
+      userId: data.referrerId,
+      actorId: ref.referred_id as string,
+      type: "referral_joined",
+      title,
+      body,
+      link: "/auth/invite",
+    });
+    return await sendPushToUser(data.referrerId, {
+      title,
+      body,
+      url: "/auth/invite",
+      tag: "referral",
+    });
   });
 
 /** İstek kabul edilince requester'a bildirim. Sunucu, accepted kaydı doğrular. */

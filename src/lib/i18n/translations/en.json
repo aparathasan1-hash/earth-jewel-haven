@@ -14,6 +14,7 @@
     "friends": "Friends",
     "discover": "Discover",
     "live": "Live",
+    "invite": "Invite",
     "assistant": "Yanında"
   },
   "legal": {
@@ -540,6 +541,20 @@
     "sharedInterests": "shared",
     "clubSubtitle": "Join mothers who gave birth the same month",
     "clubError": "Could not open your birth club"
+  },
+  "invite": {
+    "title": "Invite friends",
+    "desc": "Share your link with mothers who'd feel at home here. When they join, you'll both grow the village.",
+    "yourLink": "Your invite link",
+    "copy": "Copy",
+    "copiedShort": "Copied",
+    "copied": "Link copied 🌿",
+    "share": "Share",
+    "shareText": "Join me in the village — a gentle companion for postpartum.",
+    "codeLabel": "Your code",
+    "joined": "Joined through you",
+    "empty": "No one yet. Share your link to welcome the first mother.",
+    "aMother": "A mother"
   },
   "live": {
     "title": "Live",

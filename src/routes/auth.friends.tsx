@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Loader2, Check, X, UserMinus, Users, User } from "lucide-react";
+import { ArrowLeft, Loader2, Check, X, UserMinus, Users, User, Gift } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import {
@@ -133,6 +133,12 @@ function FriendsPage() {
         <h1 className="flex items-center gap-2 font-serif text-2xl text-foreground">
           <Users className="h-6 w-6 text-accent" /> {t("friends.title") || "Friends"}
         </h1>
+        <Link
+          to="/auth/invite"
+          className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-accent"
+        >
+          <Gift className="h-4 w-4 text-accent" /> {t("nav.invite") || "Invite"}
+        </Link>
       </div>
 
       {/* Incoming requests */}

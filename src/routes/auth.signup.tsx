@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { UserPlus, Mail, Lock, ArrowLeft, User } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
-import { signUp } from "@/lib/auth";
+import { signUp, redeemReferral } from "@/lib/auth";
 import { signUpSchema, type SignUpFormData } from "@/lib/validation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +21,12 @@ export const Route = createFileRoute("/auth/signup")({
 function SignupPage() {
   const t = useT();
   const navigate = useNavigate();
+
+  // Davet linkinden gelen ?ref kodunu sakla (giriş sonrası kullanılır).
+  useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get("ref");
+    if (ref) localStorage.setItem("pending_referral", ref.trim());
+  }, []);
 
   const {
     register,
@@ -43,6 +50,16 @@ function SignupPage() {
         toast.success(t("auth.checkEmail") || "Please check your email to confirm your account before logging in.");
         navigate({ to: "/auth/login" });
       } else {
+        // Oturum hazır → varsa davet kodunu hemen kullan (en iyi çaba).
+        const code = localStorage.getItem("pending_referral");
+        if (code) {
+          localStorage.removeItem("pending_referral");
+          try {
+            await redeemReferral(code);
+          } catch {
+            /* best-effort */
+          }
+        }
         navigate({ to: "/auth/profile" });
       }
     } catch (err: unknown) {
