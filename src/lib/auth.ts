@@ -135,6 +135,50 @@ export async function signOut() {
   if (error) throw error;
 }
 
+// --- Hesap Yönetimi (Faz 5.3) ---
+
+export async function updatePassword(newPassword: string) {
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) throw error;
+}
+
+export async function updateEmail(newEmail: string) {
+  // Supabase yeni adrese doğrulama e-postası gönderir.
+  const { error } = await supabase.auth.updateUser({ email: newEmail });
+  if (error) throw error;
+}
+
+// KVKK/GDPR: kullanıcının tüm kişisel verisini topla (RLS sadece kendi verisini döndürür).
+export async function exportMyData(userId: string): Promise<Record<string, unknown>> {
+  const out: Record<string, unknown> = { exported_at: new Date().toISOString(), user_id: userId };
+  const grab = async (table: string, col = "user_id") => {
+    const { data } = await supabase.from(table).select("*").eq(col, userId);
+    return data ?? [];
+  };
+
+  out.profile = (await supabase.from("profiles").select("*").eq("id", userId).maybeSingle()).data;
+  out.preferences = await grab("user_preferences");
+  out.mood_entries = await grab("mood_entries");
+  out.breath_sessions = await grab("breath_sessions");
+  out.posts = await grab("posts");
+  out.saved_vault_items = await grab("saved_vault_items");
+
+  const babies = (await supabase.from("babies").select("*").eq("user_id", userId)).data ?? [];
+  out.babies = babies;
+  const babyIds = babies.map((b: { id: string }) => b.id);
+  if (babyIds.length > 0) {
+    const grabBaby = async (table: string) => {
+      const { data } = await supabase.from(table).select("*").in("baby_id", babyIds);
+      return data ?? [];
+    };
+    out.baby_measurements = await grabBaby("baby_measurements");
+    out.baby_milestones = await grabBaby("baby_milestones");
+    out.baby_feeding_logs = await grabBaby("baby_feeding_logs");
+    out.baby_sleep_logs = await grabBaby("baby_sleep_logs");
+  }
+  return out;
+}
+
 export async function getCurrentUser() {
   try {
     const { data } = await supabase.auth.getUser();

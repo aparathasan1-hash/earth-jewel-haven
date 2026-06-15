@@ -1,16 +1,22 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Settings, Loader2, Bell, ShieldCheck, Users } from "lucide-react";
+import { ArrowLeft, Settings, Loader2, Bell, ShieldCheck, Users, KeyRound, Mail, Download, Trash2, AlertTriangle, UserCog } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import {
   getCurrentUser,
   getNotificationPreferences,
   updateNotificationPreferences,
+  updatePassword,
+  updateEmail,
+  exportMyData,
+  signOut,
   type NotificationPreferences,
 } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
 import { subscribeToPush, unsubscribeFromPush, isPushSupported } from "@/lib/push";
 import { sendTestPush } from "@/lib/api/push.functions";
+import { deleteAccount } from "@/lib/api/account.functions";
 
 export const Route = createFileRoute("/auth/settings")({
   head: () => ({
@@ -333,6 +339,9 @@ function SettingsPage() {
           </div>
         </section>
 
+        {/* Account Section */}
+        <AccountSection userId={userId} navigate={navigate} t={t} />
+
         {saving && (
           <div className="mt-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -341,6 +350,252 @@ function SettingsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+function AccountSection({
+  userId,
+  navigate,
+  t,
+}: {
+  userId: string;
+  navigate: ReturnType<typeof useNavigate>;
+  t: (key: string) => string;
+}) {
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [busy, setBusy] = useState<string | null>(null);
+  const [showDelete, setShowDelete] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+
+  async function handlePassword() {
+    if (newPassword.length < 6) {
+      toast.error(t("account.pwShort") || "Password must be at least 6 characters");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error(t("account.pwMismatch") || "Passwords don't match");
+      return;
+    }
+    setBusy("pw");
+    try {
+      await updatePassword(newPassword);
+      setNewPassword("");
+      setConfirmPassword("");
+      toast.success(t("account.pwUpdated") || "Password updated 🌿");
+    } catch (err) {
+      console.error("❌ Password error:", err);
+      toast.error(t("account.pwError") || "Could not update password");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function handleEmail() {
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(newEmail)) {
+      toast.error(t("account.emailInvalid") || "Enter a valid email");
+      return;
+    }
+    setBusy("email");
+    try {
+      await updateEmail(newEmail);
+      setNewEmail("");
+      toast.success(t("account.emailSent") || "Confirmation sent to your new email");
+    } catch (err) {
+      console.error("❌ Email error:", err);
+      toast.error(t("account.emailError") || "Could not change email");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function handleExport() {
+    setBusy("export");
+    try {
+      const data = await exportMyData(userId);
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `villageless-mama-data-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(t("account.exported") || "Your data was downloaded 🌿");
+    } catch (err) {
+      console.error("❌ Export error:", err);
+      toast.error(t("account.exportError") || "Could not export data");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function handleDelete() {
+    const keyword = t("account.deleteKeyword") || "DELETE";
+    if (deleteConfirm.trim().toUpperCase() !== keyword.toUpperCase()) {
+      toast.error((t("account.deleteTypeWord") || "Type {word} to confirm").replace("{word}", keyword));
+      return;
+    }
+    setBusy("delete");
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      const token = session.session?.access_token;
+      if (!token) throw new Error("no session");
+      const res = await deleteAccount({ data: { accessToken: token } });
+      if (!res.ok) {
+        toast.error(
+          res.reason === "not_configured"
+            ? t("account.deleteNotConfigured") || "Account deletion isn't available right now."
+            : t("account.deleteError") || "Could not delete account"
+        );
+        return;
+      }
+      await signOut().catch(() => {});
+      toast.success(t("account.deleted") || "Your account was deleted. Take care 🌿");
+      navigate({ to: "/" });
+    } catch (err) {
+      console.error("❌ Delete account error:", err);
+      toast.error(t("account.deleteError") || "Could not delete account");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  const inputCls =
+    "w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent";
+
+  return (
+    <section className="mt-6 rounded-2xl border border-border bg-card p-6">
+      <h2 className="flex items-center gap-2 font-serif text-lg text-foreground mb-2">
+        <UserCog className="h-5 w-5 text-accent" /> {t("account.title") || "Account"}
+      </h2>
+      <p className="mb-6 text-xs text-muted-foreground">
+        {t("account.desc") || "Manage your sign-in, your data, and your account."}
+      </p>
+
+      <div className="space-y-6">
+        {/* Change password */}
+        <div className="pb-6 border-b border-border/50">
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <KeyRound className="h-4 w-4 text-accent" /> {t("account.changePassword") || "Change password"}
+          </label>
+          <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder={t("account.newPassword") || "New password"}
+            className={`mt-2 ${inputCls}`}
+          />
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder={t("account.confirmPassword") || "Confirm new password"}
+            className={`mt-2 ${inputCls}`}
+          />
+          <button
+            onClick={handlePassword}
+            disabled={busy === "pw"}
+            className="mt-2 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+          >
+            {busy === "pw" && <Loader2 className="h-4 w-4 animate-spin" />}
+            {t("account.updatePassword") || "Update password"}
+          </button>
+        </div>
+
+        {/* Change email */}
+        <div className="pb-6 border-b border-border/50">
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <Mail className="h-4 w-4 text-accent" /> {t("account.changeEmail") || "Change email"}
+          </label>
+          <input
+            type="email"
+            value={newEmail}
+            onChange={(e) => setNewEmail(e.target.value)}
+            placeholder={t("account.newEmail") || "New email address"}
+            className={`mt-2 ${inputCls}`}
+          />
+          <button
+            onClick={handleEmail}
+            disabled={busy === "email"}
+            className="mt-2 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+          >
+            {busy === "email" && <Loader2 className="h-4 w-4 animate-spin" />}
+            {t("account.updateEmail") || "Update email"}
+          </button>
+        </div>
+
+        {/* Export data */}
+        <div className="pb-6 border-b border-border/50">
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <Download className="h-4 w-4 text-accent" /> {t("account.exportData") || "Download my data"}
+          </label>
+          <p className="mt-1 mb-2 text-xs text-muted-foreground">
+            {t("account.exportDesc") || "Get a copy of your data (profile, babies, mood, logs) as a JSON file."}
+          </p>
+          <button
+            onClick={handleExport}
+            disabled={busy === "export"}
+            className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2 text-sm hover:border-accent disabled:opacity-50"
+          >
+            {busy === "export" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            {t("account.exportData") || "Download my data"}
+          </button>
+        </div>
+
+        {/* Delete account */}
+        <div>
+          <label className="flex items-center gap-2 text-sm font-medium text-destructive">
+            <AlertTriangle className="h-4 w-4" /> {t("account.deleteAccount") || "Delete account"}
+          </label>
+          <p className="mt-1 mb-2 text-xs text-muted-foreground">
+            {t("account.deleteDesc") || "Permanently deletes your account and all your data. This cannot be undone."}
+          </p>
+          {!showDelete ? (
+            <button
+              onClick={() => setShowDelete(true)}
+              className="inline-flex items-center gap-2 rounded-full border border-destructive/40 px-5 py-2 text-sm text-destructive hover:bg-destructive/10"
+            >
+              <Trash2 className="h-4 w-4" /> {t("account.deleteAccount") || "Delete account"}
+            </button>
+          ) : (
+            <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+              <p className="mb-2 text-xs text-muted-foreground">
+                {(t("account.deleteTypeWord") || "Type {word} to confirm").replace(
+                  "{word}",
+                  t("account.deleteKeyword") || "DELETE"
+                )}
+              </p>
+              <input
+                value={deleteConfirm}
+                onChange={(e) => setDeleteConfirm(e.target.value)}
+                placeholder={t("account.deleteKeyword") || "DELETE"}
+                className={inputCls}
+              />
+              <div className="mt-3 flex gap-2">
+                <button
+                  onClick={handleDelete}
+                  disabled={busy === "delete"}
+                  className="inline-flex items-center gap-2 rounded-full bg-destructive px-5 py-2 text-sm font-medium text-white disabled:opacity-50"
+                >
+                  {busy === "delete" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                  {t("account.confirmDelete") || "Permanently delete"}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDelete(false);
+                    setDeleteConfirm("");
+                  }}
+                  className="rounded-full border border-border px-5 py-2 text-sm"
+                >
+                  {t("common.cancel") || "Cancel"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
   );
 }
 
