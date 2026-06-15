@@ -15,6 +15,7 @@
     "discover": "Discover",
     "live": "Live",
     "invite": "Invite",
+    "insights": "Insights",
     "assistant": "Yanında"
   },
   "legal": {
@@ -555,6 +556,27 @@
     "joined": "Joined through you",
     "empty": "No one yet. Share your link to welcome the first mother.",
     "aMother": "A mother"
+  },
+  "insights": {
+    "title": "Your week",
+    "subtitle": "A gentle look at the last 7 days. No judgment — just a mirror.",
+    "mood": "Mood",
+    "moodAvg": "average mood",
+    "checkIns": "check-ins this week",
+    "moodEmpty": "No check-ins yet this week. The daily check-in is always here.",
+    "breathing": "Breathing",
+    "sessions": "sessions",
+    "minutes": "minutes",
+    "streak": "day streak",
+    "breathEmpty": "No breathing sessions this week. Even one minute counts.",
+    "breatheNow": "Breathe now",
+    "feeds": "feeds",
+    "sleep": "sleep",
+    "day": "day",
+    "disclaimer": "These reflect only what you logged. They are not medical guidance.",
+    "noteStreak": "A {n}-day breathing streak. Your nervous system thanks you. 🌿",
+    "noteMoodDown": "This week felt heavier. That's allowed. The Quiet Room and Crisis support are here if you need them.",
+    "noteMoodUp": "Your mood lifted a little this week. Gently noted. 🌿"
   },
   "live": {
     "title": "Live",

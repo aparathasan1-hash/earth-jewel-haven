@@ -31,6 +31,7 @@ import { Route as AuthOnboardingRouteImport } from './routes/auth.onboarding'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AuthLiveRouteImport } from './routes/auth.live'
 import { Route as AuthInviteRouteImport } from './routes/auth.invite'
+import { Route as AuthInsightsRouteImport } from './routes/auth.insights'
 import { Route as AuthGoliveRouteImport } from './routes/auth.golive'
 import { Route as AuthFriendsRouteImport } from './routes/auth.friends'
 import { Route as AuthFeedRouteImport } from './routes/auth.feed'
@@ -156,6 +157,11 @@ const AuthInviteRoute = AuthInviteRouteImport.update({
   path: '/auth/invite',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthInsightsRoute = AuthInsightsRouteImport.update({
+  id: '/auth/insights',
+  path: '/auth/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthGoliveRoute = AuthGoliveRouteImport.update({
   id: '/auth/golive',
   path: '/auth/golive',
@@ -246,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/auth/feed': typeof AuthFeedRoute
   '/auth/friends': typeof AuthFriendsRoute
   '/auth/golive': typeof AuthGoliveRoute
+  '/auth/insights': typeof AuthInsightsRoute
   '/auth/invite': typeof AuthInviteRoute
   '/auth/live': typeof AuthLiveRoute
   '/auth/login': typeof AuthLoginRoute
@@ -284,6 +291,7 @@ export interface FileRoutesByTo {
   '/auth/feed': typeof AuthFeedRoute
   '/auth/friends': typeof AuthFriendsRoute
   '/auth/golive': typeof AuthGoliveRoute
+  '/auth/insights': typeof AuthInsightsRoute
   '/auth/invite': typeof AuthInviteRoute
   '/auth/live': typeof AuthLiveRoute
   '/auth/login': typeof AuthLoginRoute
@@ -323,6 +331,7 @@ export interface FileRoutesById {
   '/auth/feed': typeof AuthFeedRoute
   '/auth/friends': typeof AuthFriendsRoute
   '/auth/golive': typeof AuthGoliveRoute
+  '/auth/insights': typeof AuthInsightsRoute
   '/auth/invite': typeof AuthInviteRoute
   '/auth/live': typeof AuthLiveRoute
   '/auth/login': typeof AuthLoginRoute
@@ -363,6 +372,7 @@ export interface FileRouteTypes {
     | '/auth/feed'
     | '/auth/friends'
     | '/auth/golive'
+    | '/auth/insights'
     | '/auth/invite'
     | '/auth/live'
     | '/auth/login'
@@ -401,6 +411,7 @@ export interface FileRouteTypes {
     | '/auth/feed'
     | '/auth/friends'
     | '/auth/golive'
+    | '/auth/insights'
     | '/auth/invite'
     | '/auth/live'
     | '/auth/login'
@@ -439,6 +450,7 @@ export interface FileRouteTypes {
     | '/auth/feed'
     | '/auth/friends'
     | '/auth/golive'
+    | '/auth/insights'
     | '/auth/invite'
     | '/auth/live'
     | '/auth/login'
@@ -478,6 +490,7 @@ export interface RootRouteChildren {
   AuthFeedRoute: typeof AuthFeedRoute
   AuthFriendsRoute: typeof AuthFriendsRoute
   AuthGoliveRoute: typeof AuthGoliveRoute
+  AuthInsightsRoute: typeof AuthInsightsRoute
   AuthInviteRoute: typeof AuthInviteRoute
   AuthLiveRoute: typeof AuthLiveRoute
   AuthLoginRoute: typeof AuthLoginRoute
@@ -648,6 +661,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthInviteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/insights': {
+      id: '/auth/insights'
+      path: '/auth/insights'
+      fullPath: '/auth/insights'
+      preLoaderRoute: typeof AuthInsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/golive': {
       id: '/auth/golive'
       path: '/auth/golive'
@@ -789,6 +809,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthFeedRoute: AuthFeedRoute,
   AuthFriendsRoute: AuthFriendsRoute,
   AuthGoliveRoute: AuthGoliveRoute,
+  AuthInsightsRoute: AuthInsightsRoute,
   AuthInviteRoute: AuthInviteRoute,
   AuthLiveRoute: AuthLiveRoute,
   AuthLoginRoute: AuthLoginRoute,

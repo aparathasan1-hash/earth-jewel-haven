@@ -15,6 +15,7 @@
     "discover": "Keşfet",
     "live": "Canlı",
     "invite": "Davet et",
+    "insights": "İçgörüler",
     "assistant": "Yanında"
   },
   "legal": {
@@ -552,6 +553,27 @@
     "joined": "Senin davetinle katılanlar",
     "empty": "Henüz kimse yok. Linkini paylaş, ilk anneyi karşıla.",
     "aMother": "Bir anne"
+  },
+  "insights": {
+    "title": "Haftan",
+    "subtitle": "Son 7 güne nazik bir bakış. Yargı yok — yalnızca bir ayna.",
+    "mood": "Ruh hâli",
+    "moodAvg": "ortalama ruh hâli",
+    "checkIns": "bu hafta giriş",
+    "moodEmpty": "Bu hafta henüz giriş yok. Günlük yoklama her zaman burada.",
+    "breathing": "Nefes",
+    "sessions": "seans",
+    "minutes": "dakika",
+    "streak": "günlük seri",
+    "breathEmpty": "Bu hafta nefes seansı yok. Bir dakika bile sayılır.",
+    "breatheNow": "Şimdi nefes al",
+    "feeds": "öğün",
+    "sleep": "uyku",
+    "day": "gün",
+    "disclaimer": "Bunlar yalnızca senin kaydettiklerini yansıtır. Tıbbi yönlendirme değildir.",
+    "noteStreak": "{n} günlük nefes serisi. Sinir sistemin sana minnettar. 🌿",
+    "noteMoodDown": "Bu hafta daha ağır geçti. Bu çok normal. İhtiyacın olursa Sessiz Oda ve Kriz desteği burada.",
+    "noteMoodUp": "Ruh hâlin bu hafta biraz yükseldi. Nazikçe not edildi. 🌿"
   },
   "live": {
     "title": "Canlı",
