@@ -12,6 +12,7 @@
     "privacy": "Gizlilik",
     "feed": "Akış",
     "friends": "Arkadaşlar",
+    "messages": "Mesajlar",
     "discover": "Keşfet",
     "live": "Canlı",
     "invite": "Davet et",
@@ -554,6 +555,19 @@
     "joined": "Senin davetinle katılanlar",
     "empty": "Henüz kimse yok. Linkini paylaş, ilk anneyi karşıla.",
     "aMother": "Bir anne"
+  },
+  "dm": {
+    "title": "Mesajlar",
+    "empty": "Henüz konuşma yok. Başlamak için bir arkadaşına mesaj at.",
+    "selectThread": "Bir konuşma seç",
+    "startHint": "Merhaba de 🌿",
+    "placeholder": "Bir mesaj yaz…",
+    "message": "Mesaj",
+    "you": "Sen",
+    "media": "Medya",
+    "aFriend": "Arkadaş",
+    "back": "Geri",
+    "sendError": "Mesaj gönderilemedi"
   },
   "chat": {
     "photo": "Fotoğraf",

@@ -28,6 +28,7 @@ import { Route as AuthSettingsRouteImport } from './routes/auth.settings'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AuthProfileRouteImport } from './routes/auth.profile'
 import { Route as AuthOnboardingRouteImport } from './routes/auth.onboarding'
+import { Route as AuthMessagesRouteImport } from './routes/auth.messages'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AuthLiveRouteImport } from './routes/auth.live'
 import { Route as AuthInviteRouteImport } from './routes/auth.invite'
@@ -140,6 +141,11 @@ const AuthProfileRoute = AuthProfileRouteImport.update({
 const AuthOnboardingRoute = AuthOnboardingRouteImport.update({
   id: '/auth/onboarding',
   path: '/auth/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthMessagesRoute = AuthMessagesRouteImport.update({
+  id: '/auth/messages',
+  path: '/auth/messages',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
@@ -256,6 +262,7 @@ export interface FileRoutesByFullPath {
   '/auth/invite': typeof AuthInviteRoute
   '/auth/live': typeof AuthLiveRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/messages': typeof AuthMessagesRoute
   '/auth/onboarding': typeof AuthOnboardingRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -295,6 +302,7 @@ export interface FileRoutesByTo {
   '/auth/invite': typeof AuthInviteRoute
   '/auth/live': typeof AuthLiveRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/messages': typeof AuthMessagesRoute
   '/auth/onboarding': typeof AuthOnboardingRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -335,6 +343,7 @@ export interface FileRoutesById {
   '/auth/invite': typeof AuthInviteRoute
   '/auth/live': typeof AuthLiveRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/messages': typeof AuthMessagesRoute
   '/auth/onboarding': typeof AuthOnboardingRoute
   '/auth/profile': typeof AuthProfileRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -376,6 +385,7 @@ export interface FileRouteTypes {
     | '/auth/invite'
     | '/auth/live'
     | '/auth/login'
+    | '/auth/messages'
     | '/auth/onboarding'
     | '/auth/profile'
     | '/auth/reset-password'
@@ -415,6 +425,7 @@ export interface FileRouteTypes {
     | '/auth/invite'
     | '/auth/live'
     | '/auth/login'
+    | '/auth/messages'
     | '/auth/onboarding'
     | '/auth/profile'
     | '/auth/reset-password'
@@ -454,6 +465,7 @@ export interface FileRouteTypes {
     | '/auth/invite'
     | '/auth/live'
     | '/auth/login'
+    | '/auth/messages'
     | '/auth/onboarding'
     | '/auth/profile'
     | '/auth/reset-password'
@@ -494,6 +506,7 @@ export interface RootRouteChildren {
   AuthInviteRoute: typeof AuthInviteRoute
   AuthLiveRoute: typeof AuthLiveRoute
   AuthLoginRoute: typeof AuthLoginRoute
+  AuthMessagesRoute: typeof AuthMessagesRoute
   AuthOnboardingRoute: typeof AuthOnboardingRoute
   AuthProfileRoute: typeof AuthProfileRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
@@ -638,6 +651,13 @@ declare module '@tanstack/react-router' {
       path: '/auth/onboarding'
       fullPath: '/auth/onboarding'
       preLoaderRoute: typeof AuthOnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/messages': {
+      id: '/auth/messages'
+      path: '/auth/messages'
+      fullPath: '/auth/messages'
+      preLoaderRoute: typeof AuthMessagesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/login': {
@@ -813,6 +833,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthInviteRoute: AuthInviteRoute,
   AuthLiveRoute: AuthLiveRoute,
   AuthLoginRoute: AuthLoginRoute,
+  AuthMessagesRoute: AuthMessagesRoute,
   AuthOnboardingRoute: AuthOnboardingRoute,
   AuthProfileRoute: AuthProfileRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,

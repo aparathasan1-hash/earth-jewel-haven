@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Bell, UserPlus, Check, MessageCircle, Radio } from "lucide-react";
+import { Bell, UserPlus, Check, MessageCircle, Radio, Gift, Mail } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase";
 import {
@@ -15,6 +15,8 @@ const ICONS = {
   friend_accept: Check,
   room_message: MessageCircle,
   live_started: Radio,
+  referral_joined: Gift,
+  direct_message: Mail,
 } as const;
 
 function timeAgo(iso: string, t: (k: string) => string): string {

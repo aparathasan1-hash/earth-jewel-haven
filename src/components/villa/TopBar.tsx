@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { Sun, Moon, Droplet, Shield, ShieldCheck, User, LogIn, LogOut, Settings, LayoutDashboard, Newspaper, Users, Sparkles, Compass, Radio, Gift, LineChart } from "lucide-react";
+import { Sun, Moon, Droplet, Shield, ShieldCheck, User, LogIn, LogOut, Settings, LayoutDashboard, Newspaper, Users, Sparkles, Compass, Radio, Gift, LineChart, MessageCircle } from "lucide-react";
 import { useApp } from "@/lib/store";
 import { Logo } from "./Logo";
 import { NotificationBell } from "./NotificationBell";
@@ -167,6 +167,13 @@ export function TopBar() {
                         className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
                       >
                         <Users className="h-4 w-4" /> {t("nav.friends") || "Friends"}
+                      </Link>
+                      <Link
+                        to="/auth/messages"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
+                      >
+                        <MessageCircle className="h-4 w-4" /> {t("nav.messages") || "Messages"}
                       </Link>
                       <Link
                         to="/auth/discover"

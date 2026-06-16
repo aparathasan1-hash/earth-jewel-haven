@@ -990,7 +990,7 @@ export type AppNotification = {
   id: string;
   user_id: string;
   actor_id: string | null;
-  type: "friend_request" | "friend_accept" | "room_message" | "live_started";
+  type: "friend_request" | "friend_accept" | "room_message" | "live_started" | "referral_joined" | "direct_message";
   title: string;
   body: string | null;
   link: string | null;
@@ -1135,6 +1135,97 @@ export async function redeemReferral(code: string): Promise<string | null> {
     }
   }
   return referrerId;
+}
+
+// --- Birebir Özel Mesajlaşma (1:1 DM) ---
+
+export type DirectMessage = {
+  id: string;
+  sender_id: string;
+  recipient_id: string;
+  content: string | null;
+  media_url: string | null;
+  media_type: ChatMediaType | null;
+  media_duration: number | null;
+  read_at: string | null;
+  created_at: string;
+};
+
+export type DmThread = {
+  partner_id: string;
+  username: string | null;
+  full_name: string | null;
+  avatar_url: string | null;
+  last_content: string | null;
+  last_media_type: ChatMediaType | null;
+  last_sender: string | null;
+  last_at: string;
+  unread: number;
+};
+
+// Konuşma listesi (her partner için son mesaj + okunmamış). DEFINER fn ile.
+export async function getDmThreads(userId: string): Promise<DmThread[]> {
+  const { data, error } = await supabase.rpc("get_dm_threads", { p_viewer: userId });
+  if (error) throw error;
+  return (data as DmThread[]) ?? [];
+}
+
+// İki kullanıcı arasındaki tüm mesajlar (eskiden yeniye). RLS katılımcıyla sınırlar.
+export async function getDmMessages(userId: string, partnerId: string): Promise<DirectMessage[]> {
+  const { data, error } = await supabase
+    .from("direct_messages")
+    .select("*")
+    .or(
+      `and(sender_id.eq.${userId},recipient_id.eq.${partnerId}),and(sender_id.eq.${partnerId},recipient_id.eq.${userId})`
+    )
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data as DirectMessage[]) ?? [];
+}
+
+// DM gönder (yalnız arkadaşa — RLS zorlar). Alıcıya bildirim (best-effort).
+export async function sendDirectMessage(
+  senderId: string,
+  recipientId: string,
+  content: string,
+  media?: ChatMedia
+) {
+  const trimmed = content.trim();
+  const { error } = await supabase.from("direct_messages").insert({
+    sender_id: senderId,
+    recipient_id: recipientId,
+    content: trimmed || null,
+    media_url: media?.url ?? null,
+    media_type: media?.type ?? null,
+    media_duration: media?.duration ?? null,
+  });
+  if (error) throw error;
+  try {
+    const { notifyDirectMessage } = await import("./api/push.functions");
+    await notifyDirectMessage({ data: { senderId, recipientId } });
+  } catch (e) {
+    console.warn("notifyDirectMessage başarısız:", e);
+  }
+}
+
+// Bir partnerden gelen okunmamışları okundu işaretle.
+export async function markDmRead(userId: string, partnerId: string) {
+  await supabase
+    .from("direct_messages")
+    .update({ read_at: new Date().toISOString() })
+    .eq("recipient_id", userId)
+    .eq("sender_id", partnerId)
+    .is("read_at", null);
+}
+
+// TopBar rozeti için toplam okunmamış DM sayısı.
+export async function getDmUnreadTotal(userId: string): Promise<number> {
+  const { count } = await supabase
+    .from("direct_messages")
+    .select("id", { count: "exact", head: true })
+    .eq("recipient_id", userId)
+    .is("read_at", null);
+  return count ?? 0;
 }
 
 // --- Canlı Yayın (Live Streaming L1) ---

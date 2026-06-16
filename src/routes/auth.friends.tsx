@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Loader2, Check, X, UserMinus, Users, User, Gift } from "lucide-react";
+import { ArrowLeft, Loader2, Check, X, UserMinus, Users, User, Gift, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import {
@@ -185,6 +185,13 @@ function FriendsPage() {
           <div className="space-y-2">
             {friends.map((row) => (
               <PersonRow key={row.connectionId} row={row}>
+                <Link
+                  to="/auth/messages"
+                  search={{ partner: row.profile.id }}
+                  className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs text-foreground hover:border-accent"
+                >
+                  <MessageCircle className="h-3.5 w-3.5 text-accent" /> {t("dm.message") || "Message"}
+                </Link>
                 <button
                   onClick={() => handleRemove(row, false)}
                   disabled={busy === row.connectionId}

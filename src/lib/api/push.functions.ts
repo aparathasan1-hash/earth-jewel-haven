@@ -85,7 +85,7 @@ async function displayName(
   return (data?.full_name as string) || (data?.username as string) || "Biri";
 }
 
-type NotifType = "friend_request" | "friend_accept" | "room_message" | "live_started" | "referral_joined";
+type NotifType = "friend_request" | "friend_accept" | "room_message" | "live_started" | "referral_joined" | "direct_message";
 
 // Uygulama içi bildirim oluştur (service_role → RLS bypass). Push ile birlikte çağrılır.
 async function createNotif(
@@ -273,6 +273,55 @@ export const notifyReferralJoined = createServerFn({ method: "POST" })
       body,
       url: "/auth/invite",
       tag: "referral",
+    });
+  });
+
+/**
+ * Birebir mesaj gelince alıcıya bildirim (in-app + push).
+ * Sunucu, bu çiftin en son mesajını okuyup gönderen↔alıcı arkadaşlığını doğrular.
+ */
+export const notifyDirectMessage = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ senderId: z.string().uuid(), recipientId: z.string().uuid() }))
+  .handler(async ({ data }) => {
+    const supabase = await getServiceClient();
+    if (!supabase) return { sent: 0, configured: false };
+
+    // Son mesajı doğrula (gerçekten bu gönderenden bu alıcıya)
+    const { data: last } = await supabase
+      .from("direct_messages")
+      .select("content, media_type")
+      .eq("sender_id", data.senderId)
+      .eq("recipient_id", data.recipientId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!last) return { sent: 0, configured: true };
+
+    const name = await displayName(supabase, data.senderId);
+    const mediaLabel: Record<string, string> = {
+      image: "📷 Fotoğraf",
+      audio: "🎤 Sesli mesaj",
+      video: "🎬 Video",
+    };
+    const preview = (
+      (last.content as string) ||
+      (last.media_type ? mediaLabel[last.media_type as string] : "Yeni mesaj")
+    ).slice(0, 120);
+    const link = `/auth/messages?partner=${data.senderId}`;
+    const title = `${name} 💬`;
+    await createNotif(supabase, {
+      userId: data.recipientId,
+      actorId: data.senderId,
+      type: "direct_message",
+      title,
+      body: preview,
+      link,
+    });
+    return await sendPushToUser(data.recipientId, {
+      title,
+      body: preview,
+      url: link,
+      tag: `dm-${data.senderId}`,
     });
   });
 

@@ -12,6 +12,7 @@
     "privacy": "Privacy",
     "feed": "Feed",
     "friends": "Friends",
+    "messages": "Messages",
     "discover": "Discover",
     "live": "Live",
     "invite": "Invite",
@@ -557,6 +558,19 @@
     "joined": "Joined through you",
     "empty": "No one yet. Share your link to welcome the first mother.",
     "aMother": "A mother"
+  },
+  "dm": {
+    "title": "Messages",
+    "empty": "No conversations yet. Message a friend to start.",
+    "selectThread": "Select a conversation",
+    "startHint": "Say hello 🌿",
+    "placeholder": "Write a message…",
+    "message": "Message",
+    "you": "You",
+    "media": "Media",
+    "aFriend": "Friend",
+    "back": "Back",
+    "sendError": "Could not send message"
   },
   "chat": {
     "photo": "Photo",
