@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Send, Loader2, Trash2, Globe, Users, Lock, User, Flag } from "lucide-react";
+import { ArrowLeft, Send, Loader2, Trash2, Globe, Users, Lock, User, Flag, Image as ImageIcon, X } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase";
@@ -10,6 +10,7 @@ import {
   createPost,
   deletePost,
   reportPost,
+  uploadChatMedia,
   type Post,
   type PostVisibility,
 } from "@/lib/auth";
@@ -39,6 +40,9 @@ function FeedPage() {
   const [content, setContent] = useState("");
   const [visibility, setVisibility] = useState<PostVisibility>("public");
   const [posting, setPosting] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const userIdRef = useRef("");
 
   useEffect(() => {
@@ -76,13 +80,41 @@ function FeedPage() {
     setPosts(feed);
   }
 
+  function handlePickImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error(t("chat.notImage") || "Please choose an image.");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error(t("chat.tooLarge") || "Image is too large (max 10MB).");
+      return;
+    }
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  }
+
+  function clearImage() {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(null);
+    setImagePreview(null);
+  }
+
   async function handlePost() {
     const text = content.trim();
-    if (!text || !userId) return;
+    if ((!text && !imageFile) || !userId) return;
     setPosting(true);
     try {
-      await createPost(userId, text, visibility);
+      let imageUrl: string | null = null;
+      if (imageFile) {
+        const ext = imageFile.name.split(".").pop()?.toLowerCase() || "jpg";
+        imageUrl = await uploadChatMedia(userId, imageFile, "image", ext);
+      }
+      await createPost(userId, text, visibility, imageUrl);
       setContent("");
+      clearImage();
       toast.success(t("feed.posted") || "Shared");
       await refresh();
     } catch (err) {
@@ -146,19 +178,47 @@ function FeedPage() {
           rows={3}
           className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
         />
+
+        {imagePreview && (
+          <div className="relative mt-2 inline-block">
+            <img src={imagePreview} alt="" className="max-h-48 rounded-xl object-cover" />
+            <button
+              type="button"
+              onClick={clearImage}
+              className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-black/60 text-white hover:bg-black/80"
+              aria-label={t("chat.cancel") || "Remove"}
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePickImage} />
         <div className="mt-3 flex items-center justify-between gap-2">
-          <select
-            value={visibility}
-            onChange={(e) => setVisibility(e.target.value as PostVisibility)}
-            className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
-          >
-            <option value="public">{t("feed.visPublic") || "Everyone"}</option>
-            <option value="friends">{t("feed.visFriends") || "Friends only"}</option>
-            <option value="private">{t("feed.visPrivate") || "Only me"}</option>
-          </select>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={posting}
+              title={t("chat.photo") || "Photo"}
+              aria-label={t("chat.photo") || "Photo"}
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-border text-muted-foreground transition-colors hover:border-accent hover:text-foreground disabled:opacity-50"
+            >
+              <ImageIcon className="h-4 w-4" />
+            </button>
+            <select
+              value={visibility}
+              onChange={(e) => setVisibility(e.target.value as PostVisibility)}
+              className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
+            >
+              <option value="public">{t("feed.visPublic") || "Everyone"}</option>
+              <option value="friends">{t("feed.visFriends") || "Friends only"}</option>
+              <option value="private">{t("feed.visPrivate") || "Only me"}</option>
+            </select>
+          </div>
           <button
             onClick={handlePost}
-            disabled={posting || !content.trim()}
+            disabled={posting || (!content.trim() && !imageFile)}
             className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
           >
             {posting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
@@ -207,9 +267,20 @@ function FeedPage() {
                         <VisIcon className="h-3 w-3" /> {t(meta.labelKey) || meta.fallback}
                       </span>
                     </div>
-                    <p className="mt-1 whitespace-pre-wrap break-words text-sm text-foreground">
-                      {post.content}
-                    </p>
+                    {post.content && (
+                      <p className="mt-1 whitespace-pre-wrap break-words text-sm text-foreground">
+                        {post.content}
+                      </p>
+                    )}
+                    {post.image_url && (
+                      <a href={post.image_url} target="_blank" rel="noopener noreferrer">
+                        <img
+                          src={post.image_url}
+                          alt=""
+                          className="mt-2 max-h-96 w-full rounded-xl object-cover"
+                        />
+                      </a>
+                    )}
                     <div className="mt-2 flex items-center justify-between">
                       <time className="text-[11px] text-muted-foreground">
                         {new Date(post.created_at).toLocaleString()}
