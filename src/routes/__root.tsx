@@ -13,7 +13,6 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { TopBar } from "../components/villa/TopBar";
 import { BottomNav } from "../components/villa/BottomNav";
 import { SecureLockReset } from "../components/villa/SecureLockReset";
@@ -46,7 +45,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const t = useT();
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    console.error("App error boundary:", error);
   }, [error]);
   return (
     <div className="flex min-h-dvh items-center justify-center px-4">
