@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Loader2, Send, User, MessageCircle } from "lucide-react";
+import { ArrowLeft, Loader2, Send, User, MessageCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase";
@@ -10,6 +10,7 @@ import {
   getDmThreads,
   getDmMessages,
   sendDirectMessage,
+  deleteDirectMessage,
   markDmRead,
   uploadChatMedia,
   type DmThread,
@@ -158,6 +159,17 @@ function MessagesPage() {
     }
   }
 
+  async function handleDeleteDm(id: string) {
+    try {
+      await deleteDirectMessage(id);
+      setMessages((prev) => prev.filter((m) => m.id !== id));
+      if (userId) await refreshThreads(userId);
+    } catch (err) {
+      console.error("Delete DM error:", err);
+      toast.error(t("common.error") || "Something went wrong");
+    }
+  }
+
   function timeLabel(iso: string): string {
     const d = new Date(iso);
     const today = new Date();
@@ -275,7 +287,17 @@ function MessagesPage() {
                   messages.map((msg) => {
                     const mine = msg.sender_id === userId;
                     return (
-                      <div key={msg.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                      <div key={msg.id} className={`group flex items-center gap-1.5 ${mine ? "justify-end" : "justify-start"}`}>
+                        {mine && (
+                          <button
+                            onClick={() => handleDeleteDm(msg.id)}
+                            className="opacity-0 transition-opacity group-hover:opacity-100"
+                            title={t("dm.delete") || "Delete"}
+                            aria-label={t("dm.delete") || "Delete"}
+                          >
+                            <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
+                          </button>
+                        )}
                         <div
                           className={`max-w-[80%] rounded-2xl px-4 py-2 ${
                             mine ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"

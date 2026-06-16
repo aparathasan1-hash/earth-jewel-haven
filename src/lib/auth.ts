@@ -1219,6 +1219,12 @@ export async function sendDirectMessage(
   }
 }
 
+// Kendi gönderdiğin mesajı sil (RLS: yalnız gönderen).
+export async function deleteDirectMessage(messageId: string) {
+  const { error } = await supabase.from("direct_messages").delete().eq("id", messageId);
+  if (error) throw error;
+}
+
 // Bir partnerden gelen okunmamışları okundu işaretle.
 export async function markDmRead(userId: string, partnerId: string) {
   await supabase

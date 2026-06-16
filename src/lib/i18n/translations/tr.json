@@ -599,7 +599,8 @@
     "media": "Medya",
     "aFriend": "Arkadaş",
     "back": "Geri",
-    "sendError": "Mesaj gönderilemedi"
+    "sendError": "Mesaj gönderilemedi",
+    "delete": "Sil"
   },
   "gold": {
     "title": "Gold üyelik",
