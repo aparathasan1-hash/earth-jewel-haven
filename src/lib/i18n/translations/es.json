@@ -7,9 +7,18 @@
   },
   "nav": {
     "home": "Inicio",
-    "stages": "4.º Trimestre",
-    "vault": "Bóveda",
-    "privacy": "Privacidad"
+    "stages": "4º Trimestre",
+    "vault": "Archivo",
+    "privacy": "Privacidad",
+    "feed": "Muro",
+    "friends": "Amigas",
+    "messages": "Mensajes",
+    "discover": "Descubrir",
+    "live": "En vivo",
+    "invite": "Invitar",
+    "insights": "Resumen",
+    "expert": "Experta verificada",
+    "assistant": "Yanında"
   },
   "home": {
     "eyebrow": "Un acompañante · establecido suavemente",

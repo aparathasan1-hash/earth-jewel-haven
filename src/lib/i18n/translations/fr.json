@@ -8,8 +8,17 @@
   "nav": {
     "home": "Accueil",
     "stages": "4e Trimestre",
-    "vault": "Coffre",
-    "privacy": "Confidentialité"
+    "vault": "Archive",
+    "privacy": "Confidentialité",
+    "feed": "Fil",
+    "friends": "Amies",
+    "messages": "Messages",
+    "discover": "Découvrir",
+    "live": "En direct",
+    "invite": "Inviter",
+    "insights": "Bilan",
+    "expert": "Experte vérifiée",
+    "assistant": "Yanında"
   },
   "home": {
     "eyebrow": "Un compagnon · établi doucement",

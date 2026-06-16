@@ -6,10 +6,19 @@
     "description": "Ein ruhiges, werbefreies digitales Dorf für Mütter nach der Geburt. Rituale, Essays, Atmung, Audio-Zufluchtsort."
   },
   "nav": {
-    "home": "Startseite",
+    "home": "Start",
     "stages": "4. Trimester",
-    "vault": "Tresor",
-    "privacy": "Datenschutz"
+    "vault": "Archiv",
+    "privacy": "Datenschutz",
+    "feed": "Feed",
+    "friends": "Freundinnen",
+    "messages": "Nachrichten",
+    "discover": "Entdecken",
+    "live": "Live",
+    "invite": "Einladen",
+    "insights": "Überblick",
+    "expert": "Verifizierte Expertin",
+    "assistant": "Yanında"
   },
   "home": {
     "eyebrow": "Ein Begleiter · sanft eingerichtet",
