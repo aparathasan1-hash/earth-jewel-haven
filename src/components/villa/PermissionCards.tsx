@@ -31,7 +31,9 @@ export function PermissionCards() {
           {reminders[i]}
         </motion.p>
       </AnimatePresence>
-      <span className="mt-6 block text-xs uppercase tracking-[0.2em] text-muted-foreground">Tap for another</span>
+      <span className="mt-6 block text-xs uppercase tracking-[0.2em] text-muted-foreground">
+        Tap for another
+      </span>
     </button>
   );
 }

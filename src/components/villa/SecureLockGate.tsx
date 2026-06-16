@@ -1,10 +1,42 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Fingerprint, Lock } from "lucide-react";
 import { useApp } from "@/lib/store";
+import { useT } from "@/lib/i18n";
 
-export function SecureLockGate({ children, label = "this space" }: { children: ReactNode; label?: string }) {
+const HOLD_MS = 700;
+
+export function SecureLockGate({
+  children,
+  label = "this space",
+}: {
+  children: ReactNode;
+  label?: string;
+}) {
+  const t = useT();
   const { secureLock, unlocked, setUnlocked } = useApp();
   const [pressing, setPressing] = useState(false);
+  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearHoldTimer = () => {
+    if (holdTimerRef.current) {
+      clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+  };
+
+  const startHold = () => {
+    setPressing(true);
+    clearHoldTimer();
+    holdTimerRef.current = setTimeout(() => setUnlocked(true), HOLD_MS);
+  };
+
+  const endHold = () => {
+    setPressing(false);
+    clearHoldTimer();
+  };
+
+  useEffect(() => () => clearHoldTimer(), []);
+
   if (!secureLock || unlocked) return <>{children}</>;
   return (
     <section className="mx-auto max-w-md py-16 text-center">
@@ -16,10 +48,13 @@ export function SecureLockGate({ children, label = "this space" }: { children: R
         Secure Lock is on. Press and hold to enter {label}.
       </p>
       <button
-        onMouseDown={() => { setPressing(true); setTimeout(() => setUnlocked(true), 700); }}
-        onMouseUp={() => setPressing(false)}
-        onTouchStart={() => { setPressing(true); setTimeout(() => setUnlocked(true), 700); }}
-        onTouchEnd={() => setPressing(false)}
+        type="button"
+        onMouseDown={startHold}
+        onMouseUp={endHold}
+        onMouseLeave={endHold}
+        onTouchStart={startHold}
+        onTouchEnd={endHold}
+        onTouchCancel={endHold}
         className={`mt-8 inline-flex items-center gap-3 rounded-full border border-border px-6 py-4 transition-all ${pressing ? "scale-95 bg-primary text-primary-foreground" : "bg-card"}`}
       >
         <Fingerprint className="h-6 w-6" />

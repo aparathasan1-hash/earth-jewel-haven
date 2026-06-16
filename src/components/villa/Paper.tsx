@@ -2,13 +2,23 @@ import type { ReactNode } from "react";
 
 export function Paper({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`rounded-3xl border border-border bg-card p-6 shadow-[0_1px_0_rgba(0,0,0,0.04)] ${className}`}>
+    <div
+      className={`rounded-3xl border border-border bg-card p-6 shadow-[0_1px_0_rgba(0,0,0,0.04)] ${className}`}
+    >
       {children}
     </div>
   );
 }
 
-export function SectionTitle({ eyebrow, title, lede }: { eyebrow?: string; title: string; lede?: string }) {
+export function SectionTitle({
+  eyebrow,
+  title,
+  lede,
+}: {
+  eyebrow?: string;
+  title: string;
+  lede?: string;
+}) {
   return (
     <header className="mb-8">
       {eyebrow && (
