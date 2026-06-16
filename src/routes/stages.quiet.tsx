@@ -1,9 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { BreathingPacer } from "@/components/villa/BreathingPacer";
-import { BreathingStats } from "@/components/villa/BreathingStats";
 import { useT } from "@/lib/i18n";
 import { BarChart3 } from "lucide-react";
+
+// recharts ağır (~380KB) — istatistik paneli açılınca yüklensin (lazy).
+const BreathingStats = lazy(() =>
+  import("@/components/villa/BreathingStats").then((m) => ({ default: m.BreathingStats }))
+);
 
 export const Route = createFileRoute("/stages/quiet")({
   head: () => ({
@@ -35,7 +39,11 @@ function Quiet() {
         <BarChart3 className="h-5 w-5" />
       </button>
 
-      <BreathingStats open={statsOpen} onClose={() => setStatsOpen(false)} />
+      {statsOpen && (
+        <Suspense fallback={null}>
+          <BreathingStats open={statsOpen} onClose={() => setStatsOpen(false)} />
+        </Suspense>
+      )}
     </div>
   );
 }

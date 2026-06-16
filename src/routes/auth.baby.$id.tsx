@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { ArrowLeft, Edit2, Loader2, Trash2, Plus, Heart, TrendingUp, Moon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useT } from '@/lib/i18n'
@@ -16,7 +16,10 @@ import {
   type BabyMilestone,
   type BabyMeasurement,
 } from '@/lib/auth'
-import { GrowthChart } from '@/components/villa/GrowthChart'
+// recharts ağır (~380KB) — yalnız grafik render edilince yüklensin (lazy).
+const GrowthChart = lazy(() =>
+  import('@/components/villa/GrowthChart').then((m) => ({ default: m.GrowthChart }))
+)
 import { CareTracker } from '@/components/villa/CareTracker'
 
 export const Route = createFileRoute('/auth/baby/$id')({
@@ -286,7 +289,15 @@ function BabyProfilePage() {
         )}
 
         <div className="mt-4 rounded-2xl border border-border bg-card p-4">
-          <GrowthChart birthDate={baby.birth_date} sex={baby.gender} measurements={measurements} />
+          <Suspense
+            fallback={
+              <div className="flex h-48 items-center justify-center">
+                <Loader2 className="h-6 w-6 animate-spin text-accent" />
+              </div>
+            }
+          >
+            <GrowthChart birthDate={baby.birth_date} sex={baby.gender} measurements={measurements} />
+          </Suspense>
         </div>
 
         {measurements.length > 0 && (
