@@ -572,6 +572,20 @@
     "back": "Back",
     "sendError": "Could not send message"
   },
+  "gold": {
+    "title": "Gold membership",
+    "intro": "Support this quiet village and unlock its deepest rooms. Cancel anytime.",
+    "perkVault": "Full vault — every essay & printable",
+    "perkAudio": "Premium guided audio",
+    "perkCourses": "Slow courses (Matrescence & more)",
+    "perkLive": "Go live and host sessions",
+    "upgradeCta": "Become Gold",
+    "alreadyGold": "You're a Gold member 🌿",
+    "secureNote": "Payments are processed securely by Stripe.",
+    "notConfigured": "Gold checkout isn't available yet. Please check back soon 🌿",
+    "lockedTitle": "Gold members only",
+    "lockedDesc": "This piece is part of the Gold collection. Unlock the full vault, premium audio, and courses."
+  },
   "chat": {
     "photo": "Photo",
     "voice": "Voice message",

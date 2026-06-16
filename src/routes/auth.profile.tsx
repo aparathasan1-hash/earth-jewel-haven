@@ -189,6 +189,14 @@ function ProfilePage() {
                 <span className="text-xs capitalize text-muted-foreground">
                   {profile.membership_type === "gold" ? t("auth.gold") : t("auth.free")}
                 </span>
+                {profile.membership_type !== "gold" && (
+                  <Link
+                    to="/auth/gold"
+                    className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-medium text-amber-600 hover:bg-amber-500/25 dark:text-amber-400"
+                  >
+                    {t("gold.upgradeCta") || "Become Gold"}
+                  </Link>
+                )}
               </div>
             </div>
           </div>

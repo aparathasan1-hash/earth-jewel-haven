@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
-import { Search, FileText, Headphones, BookOpen, GraduationCap, ArrowLeft, Heart, Loader2 } from "lucide-react";
+import { Search, FileText, Headphones, BookOpen, GraduationCap, ArrowLeft, Heart, Loader2, Lock, Crown } from "lucide-react";
 import { toast } from "sonner";
 import { SectionTitle, Paper } from "@/components/villa/Paper";
 import { vaultItems, type VaultItem } from "@/lib/vault-content";
 import { useT } from "@/lib/i18n";
-import { getCurrentUser, getSavedVaultItems, saveVaultItem, unsaveVaultItem } from "@/lib/auth";
+import { getCurrentUser, getProfile, getSavedVaultItems, saveVaultItem, unsaveVaultItem } from "@/lib/auth";
 
 export const Route = createFileRoute("/vault")({
   head: () => ({
@@ -34,8 +34,9 @@ const iconFor = (t: VaultItem["type"]) =>
         ? Headphones
         : GraduationCap;
 
-function VaultDetail({ item, onBack }: { item: VaultItem; onBack: () => void }) {
+function VaultDetail({ item, onBack, isGold }: { item: VaultItem; onBack: () => void; isGold: boolean }) {
   const t = useT();
+  const locked = Boolean(item.premium) && !isGold;
   return (
     <article className="animate-fade-up">
       <button
@@ -47,17 +48,43 @@ function VaultDetail({ item, onBack }: { item: VaultItem; onBack: () => void }) 
       </button>
 
       <Paper className="prose-book px-7 py-10 sm:px-12 sm:py-14">
-        <p className="text-[11px] uppercase tracking-[0.22em] text-accent">{item.type}</p>
+        <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-accent">
+          {item.type}
+          {item.premium && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-amber-600 dark:text-amber-400">
+              <Crown className="h-3 w-3" /> Gold
+            </span>
+          )}
+        </p>
         <h1 className="mt-2 font-serif text-3xl sm:text-4xl">{item.title}</h1>
         <p className="mt-2 text-muted-foreground">{item.blurb}</p>
 
-        {item.body?.map((p, i) => (
+        {locked && (
+          <div className="mt-8 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6 text-center">
+            <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400">
+              <Lock className="h-6 w-6" />
+            </span>
+            <h2 className="mt-4 font-serif text-xl">{t("gold.lockedTitle") || "Gold members only"}</h2>
+            <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
+              {t("gold.lockedDesc") ||
+                "This piece is part of the Gold collection. Unlock the full vault, premium audio, and courses."}
+            </p>
+            <Link
+              to="/auth/gold"
+              className="mt-5 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90"
+            >
+              <Crown className="h-4 w-4" /> {t("gold.upgradeCta") || "Become Gold"}
+            </Link>
+          </div>
+        )}
+
+        {!locked && item.body?.map((p, i) => (
           <p key={i} className="mt-4 text-lg leading-relaxed">
             {p}
           </p>
         ))}
 
-        {item.printable?.map((line, i) => (
+        {!locked && item.printable?.map((line, i) => (
           <p
             key={i}
             className="mt-3 rounded-xl border border-border bg-secondary/40 px-4 py-3 font-serif text-lg"
@@ -66,7 +93,7 @@ function VaultDetail({ item, onBack }: { item: VaultItem; onBack: () => void }) 
           </p>
         ))}
 
-        {item.audioNote && (
+        {!locked && item.audioNote && (
           <div className="mt-6 rounded-2xl border border-border bg-secondary/30 p-5">
             <p className="text-sm text-foreground">{item.audioNote}</p>
             <Link
@@ -78,7 +105,7 @@ function VaultDetail({ item, onBack }: { item: VaultItem; onBack: () => void }) 
           </div>
         )}
 
-        {item.comingSoon && (
+        {!locked && item.comingSoon && (
           <p className="mt-6 text-sm italic text-muted-foreground">
             {t("vault.comingSoon")}
           </p>
@@ -93,6 +120,7 @@ function Vault() {
   const [q, setQ] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isGold, setIsGold] = useState(false);
   const [savedItemIds, setSavedItemIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -106,8 +134,12 @@ function Vault() {
       const user = await getCurrentUser();
       if (user) {
         setUserId(user.id);
-        const saved = await getSavedVaultItems(user.id);
+        const [saved, profile] = await Promise.all([
+          getSavedVaultItems(user.id),
+          getProfile(user.id),
+        ]);
         setSavedItemIds(new Set(saved.map((item) => item.id)));
+        setIsGold(profile?.membership_type === "gold");
       }
     } catch (err) {
       console.error("Error loading user:", err);
@@ -160,7 +192,7 @@ function Vault() {
   if (selected) {
     return (
       <div className="mx-auto max-w-3xl px-5 pt-8">
-        <VaultDetail item={selected} onBack={() => setSelectedId(null)} />
+        <VaultDetail item={selected} onBack={() => setSelectedId(null)} isGold={isGold} />
       </div>
     );
   }
@@ -205,10 +237,17 @@ function Vault() {
           const isSaving = savingId === i.id;
           return (
             <li key={i.id}>
-              <button
-                type="button"
+              <div
+                role="button"
+                tabIndex={0}
                 onClick={() => setSelectedId(i.id)}
-                className="animate-fade-up relative w-full rounded-2xl border border-border bg-card p-5 text-left transition-colors hover:bg-secondary/40"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSelectedId(i.id);
+                  }
+                }}
+                className="animate-fade-up relative w-full cursor-pointer rounded-2xl border border-border bg-card p-5 text-left transition-colors hover:bg-secondary/40"
               >
                 <button
                   type="button"
@@ -232,7 +271,14 @@ function Vault() {
                     <Icon className="h-5 w-5" />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-[10px] uppercase tracking-[0.22em] text-accent">{i.type}</p>
+                    <p className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-accent">
+                      {i.type}
+                      {i.premium && (
+                        <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-amber-600 dark:text-amber-400">
+                          {isGold ? <Crown className="h-2.5 w-2.5" /> : <Lock className="h-2.5 w-2.5" />} Gold
+                        </span>
+                      )}
+                    </p>
                     <h3 className="mt-1 font-serif text-lg leading-snug">{i.title}</h3>
                     <p className="mt-1 text-sm text-muted-foreground">{i.blurb}</p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
@@ -247,7 +293,7 @@ function Vault() {
                     </div>
                   </div>
                 </div>
-              </button>
+              </div>
             </li>
           );
         })}

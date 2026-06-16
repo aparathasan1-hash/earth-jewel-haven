@@ -569,6 +569,20 @@
     "back": "Geri",
     "sendError": "Mesaj gönderilemedi"
   },
+  "gold": {
+    "title": "Gold üyelik",
+    "intro": "Bu sessiz köyü destekle ve en derin odalarını aç. İstediğin zaman iptal et.",
+    "perkVault": "Tüm kasa — her deneme ve yazdırılabilir",
+    "perkAudio": "Premium rehberli ses",
+    "perkCourses": "Yavaş kurslar (Matresans ve daha fazlası)",
+    "perkLive": "Canlı yayın aç ve oturum düzenle",
+    "upgradeCta": "Gold ol",
+    "alreadyGold": "Gold üyesin 🌿",
+    "secureNote": "Ödemeler Stripe ile güvenle işlenir.",
+    "notConfigured": "Gold satın alma henüz hazır değil. Yakında tekrar bak 🌿",
+    "lockedTitle": "Yalnızca Gold üyelere",
+    "lockedDesc": "Bu içerik Gold koleksiyonunun parçası. Tüm kasayı, premium sesleri ve kursları aç."
+  },
   "chat": {
     "photo": "Fotoğraf",
     "voice": "Sesli mesaj",

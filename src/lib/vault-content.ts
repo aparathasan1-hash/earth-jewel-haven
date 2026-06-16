@@ -10,6 +10,7 @@ export type VaultItem = {
   printable?: string[];
   audioNote?: string;
   comingSoon?: boolean;
+  premium?: boolean; // Gold üyelere özel — kilitli içerik
 };
 
 export const vaultItems: VaultItem[] = [
@@ -45,6 +46,7 @@ export const vaultItems: VaultItem[] = [
     type: "Audio",
     tags: ["narcissistic family", "regulation"],
     blurb: "A vocal release for inherited anger.",
+    premium: true,
     audioNote:
       "Open the Crisis Room for ambient sounds while you hum low in your chest. Start at a volume only you can hear. Let the sound widen slowly. There is no melody required.",
   },
@@ -90,6 +92,7 @@ export const vaultItems: VaultItem[] = [
     tags: ["identity"],
     blurb: "Coming soon — a 6-week slow course.",
     comingSoon: true,
+    premium: true,
     body: [
       "Six weeks of letters, one room at a time. Identity, rage, tenderness, boundaries, body, return.",
       "This course is still being written at the pace of a tired mother. Leave a bookmark here — it will open when it is ready.",
@@ -101,6 +104,7 @@ export const vaultItems: VaultItem[] = [
     type: "Essay",
     tags: ["recovery", "somatic"],
     blurb: "Notes on healing in tissue.",
+    premium: true,
     body: [
       "Healing is not a checklist on a pamphlet. Your pelvis remembers the opening. Your shoulders remember the vigil.",
       "Some days progress is measured in a deeper exhale, not in miles walked.",
@@ -139,6 +143,7 @@ export const vaultItems: VaultItem[] = [
     type: "Audio",
     tags: ["regulation", "crisis"],
     blurb: "A short, guided voice for when you need to land.",
+    premium: true,
     audioNote:
       "Sit somewhere you can feel the surface beneath you. Press your feet into the floor. Listen to the ambient sound of your choice in the Crisis Room. Breathe in for four counts, out for six. Repeat until the room feels less loud.",
   },

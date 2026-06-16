@@ -34,6 +34,7 @@ import { Route as AuthLiveRouteImport } from './routes/auth.live'
 import { Route as AuthInviteRouteImport } from './routes/auth.invite'
 import { Route as AuthInsightsRouteImport } from './routes/auth.insights'
 import { Route as AuthGoliveRouteImport } from './routes/auth.golive'
+import { Route as AuthGoldRouteImport } from './routes/auth.gold'
 import { Route as AuthFriendsRouteImport } from './routes/auth.friends'
 import { Route as AuthFeedRouteImport } from './routes/auth.feed'
 import { Route as AuthExpertRouteImport } from './routes/auth.expert'
@@ -173,6 +174,11 @@ const AuthGoliveRoute = AuthGoliveRouteImport.update({
   path: '/auth/golive',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthGoldRoute = AuthGoldRouteImport.update({
+  id: '/auth/gold',
+  path: '/auth/gold',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthFriendsRoute = AuthFriendsRouteImport.update({
   id: '/auth/friends',
   path: '/auth/friends',
@@ -257,6 +263,7 @@ export interface FileRoutesByFullPath {
   '/auth/expert': typeof AuthExpertRoute
   '/auth/feed': typeof AuthFeedRoute
   '/auth/friends': typeof AuthFriendsRoute
+  '/auth/gold': typeof AuthGoldRoute
   '/auth/golive': typeof AuthGoliveRoute
   '/auth/insights': typeof AuthInsightsRoute
   '/auth/invite': typeof AuthInviteRoute
@@ -297,6 +304,7 @@ export interface FileRoutesByTo {
   '/auth/expert': typeof AuthExpertRoute
   '/auth/feed': typeof AuthFeedRoute
   '/auth/friends': typeof AuthFriendsRoute
+  '/auth/gold': typeof AuthGoldRoute
   '/auth/golive': typeof AuthGoliveRoute
   '/auth/insights': typeof AuthInsightsRoute
   '/auth/invite': typeof AuthInviteRoute
@@ -338,6 +346,7 @@ export interface FileRoutesById {
   '/auth/expert': typeof AuthExpertRoute
   '/auth/feed': typeof AuthFeedRoute
   '/auth/friends': typeof AuthFriendsRoute
+  '/auth/gold': typeof AuthGoldRoute
   '/auth/golive': typeof AuthGoliveRoute
   '/auth/insights': typeof AuthInsightsRoute
   '/auth/invite': typeof AuthInviteRoute
@@ -380,6 +389,7 @@ export interface FileRouteTypes {
     | '/auth/expert'
     | '/auth/feed'
     | '/auth/friends'
+    | '/auth/gold'
     | '/auth/golive'
     | '/auth/insights'
     | '/auth/invite'
@@ -420,6 +430,7 @@ export interface FileRouteTypes {
     | '/auth/expert'
     | '/auth/feed'
     | '/auth/friends'
+    | '/auth/gold'
     | '/auth/golive'
     | '/auth/insights'
     | '/auth/invite'
@@ -460,6 +471,7 @@ export interface FileRouteTypes {
     | '/auth/expert'
     | '/auth/feed'
     | '/auth/friends'
+    | '/auth/gold'
     | '/auth/golive'
     | '/auth/insights'
     | '/auth/invite'
@@ -501,6 +513,7 @@ export interface RootRouteChildren {
   AuthExpertRoute: typeof AuthExpertRoute
   AuthFeedRoute: typeof AuthFeedRoute
   AuthFriendsRoute: typeof AuthFriendsRoute
+  AuthGoldRoute: typeof AuthGoldRoute
   AuthGoliveRoute: typeof AuthGoliveRoute
   AuthInsightsRoute: typeof AuthInsightsRoute
   AuthInviteRoute: typeof AuthInviteRoute
@@ -695,6 +708,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthGoliveRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/gold': {
+      id: '/auth/gold'
+      path: '/auth/gold'
+      fullPath: '/auth/gold'
+      preLoaderRoute: typeof AuthGoldRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/friends': {
       id: '/auth/friends'
       path: '/auth/friends'
@@ -828,6 +848,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthExpertRoute: AuthExpertRoute,
   AuthFeedRoute: AuthFeedRoute,
   AuthFriendsRoute: AuthFriendsRoute,
+  AuthGoldRoute: AuthGoldRoute,
   AuthGoliveRoute: AuthGoliveRoute,
   AuthInsightsRoute: AuthInsightsRoute,
   AuthInviteRoute: AuthInviteRoute,
