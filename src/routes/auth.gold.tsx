@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Loader2, Crown, Check, BookOpen, Headphones, GraduationCap, Radio } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
+import { supabase } from "@/lib/supabase";
 import { getCurrentUser, getProfile } from "@/lib/auth";
-import { redirectToCheckout } from "@/lib/stripe";
+import { createGoldCheckout, activateGoldFromSession } from "@/lib/api/checkout.functions";
 
 export const Route = createFileRoute("/auth/gold")({
   head: () => ({
@@ -32,24 +33,49 @@ function GoldPage() {
         return;
       }
       setUserId(user.id);
-      const profile = await getProfile(user.id);
+      let profile = await getProfile(user.id);
+
+      // Ödeme dönüşü: session_id varsa Gold'u doğrula+etkinleştir.
+      const sessionId = new URLSearchParams(window.location.search).get("session_id");
+      if (sessionId && profile?.membership_type !== "gold") {
+        try {
+          const { data: s } = await supabase.auth.getSession();
+          const token = s.session?.access_token;
+          if (token) {
+            const res = await activateGoldFromSession({ data: { accessToken: token, sessionId } });
+            if (res.activated) {
+              toast.success(t("gold.activated") || "Welcome to Gold 🌿");
+              profile = await getProfile(user.id);
+            }
+          }
+        } catch (err) {
+          console.warn("Gold activation failed:", err);
+        }
+      }
+
       setIsGold(profile?.membership_type === "gold");
       setLoading(false);
     })();
-  }, [navigate]);
+  }, [navigate, t]);
 
   async function handleUpgrade() {
     if (!userId) return;
     setBusy(true);
     try {
-      await redirectToCheckout(userId);
-      // Başarılıysa Stripe'a yönlenir; buraya dönerse yönlenme olmadı demektir.
-    } catch (err) {
-      console.warn("Gold checkout not available:", err);
+      const { data: s } = await supabase.auth.getSession();
+      const token = s.session?.access_token;
+      if (!token) throw new Error("no session");
+      const res = await createGoldCheckout({ data: { accessToken: token, origin: window.location.origin } });
+      if (res.url) {
+        window.location.href = res.url;
+        return;
+      }
       toast.error(
-        t("gold.notConfigured") ||
-          "Gold checkout isn't available yet. Please check back soon 🌿"
+        t("gold.notConfigured") || "Gold checkout isn't available yet. Please check back soon 🌿"
       );
+    } catch (err) {
+      console.warn("Gold checkout error:", err);
+      toast.error(t("gold.notConfigured") || "Gold checkout isn't available yet. Please check back soon 🌿");
     } finally {
       setBusy(false);
     }

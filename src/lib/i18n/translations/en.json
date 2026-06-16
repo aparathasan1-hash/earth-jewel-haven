@@ -617,7 +617,8 @@
     "secureNote": "Payments are processed securely by Stripe.",
     "notConfigured": "Gold checkout isn't available yet. Please check back soon 🌿",
     "lockedTitle": "Gold members only",
-    "lockedDesc": "This piece is part of the Gold collection. Unlock the full vault, premium audio, and courses."
+    "lockedDesc": "This piece is part of the Gold collection. Unlock the full vault, premium audio, and courses.",
+    "activated": "Welcome to Gold 🌿"
   },
   "chat": {
     "photo": "Photo",

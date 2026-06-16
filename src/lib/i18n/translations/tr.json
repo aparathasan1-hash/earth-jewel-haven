@@ -614,7 +614,8 @@
     "secureNote": "Ödemeler Stripe ile güvenle işlenir.",
     "notConfigured": "Gold satın alma henüz hazır değil. Yakında tekrar bak 🌿",
     "lockedTitle": "Yalnızca Gold üyelere",
-    "lockedDesc": "Bu içerik Gold koleksiyonunun parçası. Tüm kasayı, premium sesleri ve kursları aç."
+    "lockedDesc": "Bu içerik Gold koleksiyonunun parçası. Tüm kasayı, premium sesleri ve kursları aç.",
+    "activated": "Gold'a hoş geldin 🌿"
   },
   "chat": {
     "photo": "Fotoğraf",
