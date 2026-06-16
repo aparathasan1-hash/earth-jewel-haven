@@ -1,12 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-// AI Asistan "Yanında" — sunucu tarafı Claude çağrısı.
+// AI Asistan "Yanında" — sunucu tarafı DeepSeek çağrısı (OpenAI uyumlu API).
 // API anahtarı SADECE burada (process.env) okunur, istemciye asla gitmez.
 // Anahtar yoksa configured:false döner (UI "henüz aktif değil" gösterir).
 
-const MODEL = "claude-opus-4-8";
-const MAX_TOKENS = 4096;
+const MODEL = "deepseek-chat";
+const MAX_TOKENS = 2048;
+const DEEPSEEK_URL = "https://api.deepseek.com/chat/completions";
 
 // --- Kriz tespiti (çok dilli, basit anahtar kelime taraması) ---
 // Amaç: AI'nın tek başına yönetmemesi gereken durumları yakalayıp
@@ -92,7 +93,7 @@ export const getAssistantReply = createServerFn({ method: "POST" })
       };
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = process.env.DEEPSEEK_API_KEY;
     if (!apiKey) {
       // İskelet modu: anahtar henüz eklenmedi.
       return {
@@ -108,37 +109,46 @@ export const getAssistantReply = createServerFn({ method: "POST" })
         ? bridgeSystem(data.speaker ?? "woman")
         : SUPPORT_SYSTEM;
 
-    // SDK sadece sunucu tarafında import edilir (istemci bundle'ına girmez).
-    const { default: Anthropic } = await import("@anthropic-ai/sdk");
-    const client = new Anthropic({ apiKey });
-
     try {
-      const response = await client.messages.create({
-        model: MODEL,
-        max_tokens: MAX_TOKENS,
-        thinking: { type: "adaptive" },
-        system,
-        messages: data.messages as ChatMsg[],
+      // DeepSeek OpenAI uyumlu: system mesajı + sohbet geçmişi.
+      const res = await fetch(DEEPSEEK_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: MAX_TOKENS,
+          temperature: 1.0,
+          messages: [{ role: "system", content: system }, ...(data.messages as ChatMsg[])],
+        }),
       });
 
-      const text = response.content
-        .map((b) => (b.type === "text" ? b.text : ""))
-        .join("\n")
-        .trim();
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        console.error("❌ DeepSeek API hatası:", res.status, body.slice(0, 300));
+        return {
+          configured: true,
+          crisis: false,
+          error: true,
+          reply: "Şu an yanıt veremiyorum, biraz sonra tekrar dener misin? 🌿",
+        };
+      }
 
-      return {
-        configured: true,
-        crisis: false,
-        reply: text || "…",
+      const json = (await res.json()) as {
+        choices?: { message?: { content?: string } }[];
       };
+      const text = (json.choices?.[0]?.message?.content ?? "").trim();
+
+      return { configured: true, crisis: false, reply: text || "…" };
     } catch (err) {
-      console.error("❌ Anthropic API hatası:", err);
+      console.error("❌ DeepSeek API hatası:", err);
       return {
         configured: true,
         crisis: false,
         error: true,
-        reply:
-          "Şu an yanıt veremiyorum, biraz sonra tekrar dener misin? 🌿",
+        reply: "Şu an yanıt veremiyorum, biraz sonra tekrar dener misin? 🌿",
       };
     }
   });
