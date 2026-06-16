@@ -476,6 +476,7 @@ export type VaultItemDB = {
   printable: string[];
   audio_note: string | null;
   coming_soon: boolean;
+  is_premium: boolean;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -498,6 +499,7 @@ export async function createVaultItem(item: {
   printable?: string[];
   audio_note?: string;
   coming_soon?: boolean;
+  is_premium?: boolean;
   created_by?: string;
 }) {
   const { error } = await supabase.from("vault_items").insert(item);
@@ -524,7 +526,16 @@ export async function getSavedVaultItems(userId: string): Promise<VaultItemDB[]>
     .order("saved_at", { ascending: false });
 
   if (!data) return [];
-  return data.map((item: any) => item.vault_items as VaultItemDB);
+  return data.map((item: any) => item.vault_items as VaultItemDB).filter(Boolean);
+}
+
+// Kaydedilen öğelerin SADECE id'leri (statik + DB öğeleri için ortak; FK yok).
+export async function getSavedVaultItemIds(userId: string): Promise<string[]> {
+  const { data } = await supabase
+    .from("saved_vault_items")
+    .select("vault_item_id")
+    .eq("user_id", userId);
+  return ((data as { vault_item_id: string }[]) ?? []).map((r) => r.vault_item_id);
 }
 
 export async function saveVaultItem(userId: string, vaultItemId: string) {

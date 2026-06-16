@@ -193,6 +193,7 @@
     "cycles": "Cycles",
     "idleLabel": "Breathe with the forest",
     "rhythm": "Rhythm",
+    "last7Days": "Last 7 days",
     "startBtn": "Start breathing",
     "pauseBtn": "Pause",
     "desc446": "A 4-4-6 rhythm. The forest turns green as you inhale, warm as you release.",
@@ -251,6 +252,8 @@
     "lede": "Essays, printables, audio, and courses. Tap any piece to read.",
     "searchPlaceholder": "Search the vault…",
     "clearBtn": "Clear",
+    "addedToSaved": "Added to saved 🌿",
+    "removedFromSaved": "Removed from saved",
     "resultCount": "{count} of {total} pieces",
     "backLink": "← Back to archive",
     "comingSoon": "Still growing. Bookmark this vault.",
@@ -376,6 +379,7 @@
     "tryAgainBtn": "Try again"
   },
   "common": {
+    "loginRequired": "Please log in to save items",
     "language": "Language",
     "english": "English",
     "turkish": "Türkçe",

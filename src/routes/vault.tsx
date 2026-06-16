@@ -5,7 +5,31 @@ import { toast } from "sonner";
 import { SectionTitle, Paper } from "@/components/villa/Paper";
 import { vaultItems, type VaultItem } from "@/lib/vault-content";
 import { useT } from "@/lib/i18n";
-import { getCurrentUser, getProfile, getSavedVaultItems, saveVaultItem, unsaveVaultItem } from "@/lib/auth";
+import {
+  getCurrentUser,
+  getProfile,
+  getVaultItems,
+  getSavedVaultItemIds,
+  saveVaultItem,
+  unsaveVaultItem,
+  type VaultItemDB,
+} from "@/lib/auth";
+
+// Admin'in eklediği DB öğesini statik VaultItem şekline çevir.
+function dbToVaultItem(db: VaultItemDB): VaultItem {
+  return {
+    id: db.id,
+    title: db.title,
+    type: db.type,
+    tags: db.tags ?? [],
+    blurb: db.blurb,
+    body: db.body?.length ? db.body : undefined,
+    printable: db.printable?.length ? db.printable : undefined,
+    audioNote: db.audio_note ?? undefined,
+    comingSoon: db.coming_soon,
+    premium: db.is_premium,
+  };
+}
 
 export const Route = createFileRoute("/vault")({
   head: () => ({
@@ -122,6 +146,7 @@ function Vault() {
   const [userId, setUserId] = useState<string | null>(null);
   const [isGold, setIsGold] = useState(false);
   const [savedItemIds, setSavedItemIds] = useState<Set<string>>(new Set());
+  const [allItems, setAllItems] = useState<VaultItem[]>(vaultItems);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
 
@@ -130,15 +155,23 @@ function Vault() {
   }, []);
 
   async function loadUser() {
+    // Admin'in eklediği DB öğelerini statik içerikle birleştir (en-yeni-üstte DB).
+    try {
+      const dbItems = await getVaultItems();
+      if (dbItems.length) setAllItems([...dbItems.map(dbToVaultItem), ...vaultItems]);
+    } catch (err) {
+      console.warn("DB vault items load failed (statik gösterilecek):", err);
+    }
+
     try {
       const user = await getCurrentUser();
       if (user) {
         setUserId(user.id);
-        const [saved, profile] = await Promise.all([
-          getSavedVaultItems(user.id),
+        const [savedIds, profile] = await Promise.all([
+          getSavedVaultItemIds(user.id),
           getProfile(user.id),
         ]);
-        setSavedItemIds(new Set(saved.map((item) => item.id)));
+        setSavedItemIds(new Set(savedIds));
         setIsGold(profile?.membership_type === "gold");
       }
     } catch (err) {
@@ -181,13 +214,13 @@ function Vault() {
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return vaultItems;
-    return vaultItems.filter((i) =>
+    if (!s) return allItems;
+    return allItems.filter((i) =>
       [i.title, i.blurb, i.type, ...i.tags].join(" ").toLowerCase().includes(s),
     );
-  }, [q]);
+  }, [q, allItems]);
 
-  const selected = selectedId ? vaultItems.find((i) => i.id === selectedId) : null;
+  const selected = selectedId ? allItems.find((i) => i.id === selectedId) : null;
 
   if (selected) {
     return (
@@ -226,7 +259,7 @@ function Vault() {
           )}
         </label>
         <p className="mt-2 text-xs text-muted-foreground">
-          {t("vault.resultCount", { count: filtered.length, total: vaultItems.length })}
+          {t("vault.resultCount", { count: filtered.length, total: allItems.length })}
         </p>
       </div>
 

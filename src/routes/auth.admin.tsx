@@ -61,6 +61,7 @@ function AdminPage() {
     printable: "",
     audio_note: "",
     coming_soon: false,
+    is_premium: false,
   });
 
   useEffect(() => {
@@ -192,6 +193,7 @@ function AdminPage() {
       printable: "",
       audio_note: "",
       coming_soon: false,
+      is_premium: false,
     });
     setEditingVault(null);
     setShowVaultForm(false);
@@ -207,6 +209,7 @@ function AdminPage() {
       printable: (item.printable || []).join("\n"),
       audio_note: item.audio_note || "",
       coming_soon: item.coming_soon,
+      is_premium: item.is_premium,
     });
     setEditingVault(item);
     setShowVaultForm(true);
@@ -224,6 +227,7 @@ function AdminPage() {
         printable: vaultForm.printable ? vaultForm.printable.split("\n") : [],
       audio_note: vaultForm.audio_note || undefined,
         coming_soon: vaultForm.coming_soon,
+        is_premium: vaultForm.is_premium,
       };
 
       if (editingVault) {
@@ -499,15 +503,26 @@ function AdminPage() {
                 </div>
               ) : null}
 
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={vaultForm.coming_soon}
-                  onChange={(e) => setVaultForm({ ...vaultForm, coming_soon: e.target.checked })}
-                  className="rounded"
-                />
-                Coming Soon
-              </label>
+              <div className="flex flex-wrap gap-4">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={vaultForm.coming_soon}
+                    onChange={(e) => setVaultForm({ ...vaultForm, coming_soon: e.target.checked })}
+                    className="rounded"
+                  />
+                  Coming Soon
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={vaultForm.is_premium}
+                    onChange={(e) => setVaultForm({ ...vaultForm, is_premium: e.target.checked })}
+                    className="rounded"
+                  />
+                  <Crown className="h-3.5 w-3.5 text-amber-500" /> Gold (premium)
+                </label>
+              </div>
 
               <button
                 type="submit"
@@ -530,6 +545,11 @@ function AdminPage() {
                     <p className="font-medium">{item.title}</p>
                     {item.coming_soon && (
                       <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-xs text-amber-500">Coming Soon</span>
+                    )}
+                    {item.is_premium && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-xs text-amber-500">
+                        <Crown className="h-3 w-3" /> Gold
+                      </span>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">

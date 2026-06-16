@@ -11,6 +11,9 @@ import { supabase } from "@/lib/supabase";
 const languages: { code: Lang; label: string }[] = [
   { code: "en", label: "EN" },
   { code: "tr", label: "TR" },
+  { code: "es", label: "ES" },
+  { code: "fr", label: "FR" },
+  { code: "de", label: "DE" },
 ];
 
 export function TopBar() {

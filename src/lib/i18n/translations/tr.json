@@ -193,6 +193,7 @@
     "cycles": "Tur",
     "idleLabel": "Ormanla nefes al",
     "rhythm": "Ritim",
+    "last7Days": "Son 7 gün",
     "startBtn": "Nefese başla",
     "pauseBtn": "Duraklat",
     "desc446": "4-4-6 ritmi. Nefes alırken orman yeşerir, verirken ısınır.",
@@ -251,6 +252,8 @@
     "lede": "Denemeler, yazdırılabilirler, sesler ve kurslar. Okumak için bir parçaya dokun.",
     "searchPlaceholder": "Kasa'da ara…",
     "clearBtn": "Temizle",
+    "addedToSaved": "Kaydedildi 🌿",
+    "removedFromSaved": "Kayıtlardan çıkarıldı",
     "resultCount": "{count} / {total} parça",
     "backLink": "← Arşive dön",
     "comingSoon": "Hâlâ büyüyor. Bu kasayı yer imlerine ekle.",
@@ -373,6 +376,7 @@
     "tryAgainBtn": "Tekrar dene"
   },
   "common": {
+    "loginRequired": "Kaydetmek için giriş yap",
     "language": "Dil",
     "english": "English",
     "turkish": "Türkçe",
