@@ -486,7 +486,9 @@
     "empty": "Henüz paylaşım yok. İlk paylaşan sen ol.",
     "visPublic": "Herkes",
     "visFriends": "Sadece arkadaşlar",
-    "visPrivate": "Sadece ben"
+    "visPrivate": "Sadece ben",
+    "edit": "Düzenle",
+    "edited": "Güncellendi"
   },
   "admin": {
     "reports": "Şikayetler",

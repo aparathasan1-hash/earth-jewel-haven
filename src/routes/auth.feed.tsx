@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Send, Loader2, Trash2, Globe, Users, Lock, User, Flag, Image as ImageIcon, X } from "lucide-react";
+import { ArrowLeft, Send, Loader2, Trash2, Globe, Users, Lock, User, Flag, Image as ImageIcon, X, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase";
@@ -9,6 +9,7 @@ import {
   getFeed,
   createPost,
   deletePost,
+  updatePost,
   reportPost,
   uploadChatMedia,
   type Post,
@@ -40,6 +41,8 @@ function FeedPage() {
   const [content, setContent] = useState("");
   const [visibility, setVisibility] = useState<PostVisibility>("public");
   const [posting, setPosting] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -133,6 +136,20 @@ function FeedPage() {
     } catch (err) {
       console.error("❌ Delete error:", err);
       toast.error(t("feed.deleteError") || "Could not delete");
+    }
+  }
+
+  async function handleSaveEdit(postId: string) {
+    const text = editText.trim();
+    if (!text) return;
+    try {
+      await updatePost(postId, { content: text });
+      setEditingId(null);
+      await refresh();
+      toast.success(t("feed.edited") || "Updated");
+    } catch (err) {
+      console.error("❌ Edit error:", err);
+      toast.error(t("common.error") || "Something went wrong");
     }
   }
 
@@ -267,10 +284,35 @@ function FeedPage() {
                         <VisIcon className="h-3 w-3" /> {t(meta.labelKey) || meta.fallback}
                       </span>
                     </div>
-                    {post.content && (
-                      <p className="mt-1 whitespace-pre-wrap break-words text-sm text-foreground">
-                        {post.content}
-                      </p>
+                    {editingId === post.id ? (
+                      <div className="mt-1 space-y-2">
+                        <textarea
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                          rows={3}
+                          className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleSaveEdit(post.id)}
+                            className="rounded-lg bg-primary px-3 py-1 text-xs font-medium text-primary-foreground"
+                          >
+                            {t("common.save") || "Save"}
+                          </button>
+                          <button
+                            onClick={() => setEditingId(null)}
+                            className="rounded-lg border border-border px-3 py-1 text-xs"
+                          >
+                            {t("common.cancel") || "Cancel"}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      post.content && (
+                        <p className="mt-1 whitespace-pre-wrap break-words text-sm text-foreground">
+                          {post.content}
+                        </p>
+                      )
                     )}
                     {post.image_url && (
                       <a href={post.image_url} target="_blank" rel="noopener noreferrer">
@@ -286,12 +328,25 @@ function FeedPage() {
                         {new Date(post.created_at).toLocaleString()}
                       </time>
                       {isOwn ? (
-                        <button
-                          onClick={() => handleDelete(post.id)}
-                          className="inline-flex items-center gap-1 text-[11px] text-destructive hover:underline"
-                        >
-                          <Trash2 className="h-3 w-3" /> {t("feed.delete") || "Delete"}
-                        </button>
+                        <span className="flex items-center gap-3">
+                          {post.content && editingId !== post.id && (
+                            <button
+                              onClick={() => {
+                                setEditingId(post.id);
+                                setEditText(post.content);
+                              }}
+                              className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
+                            >
+                              <Edit2 className="h-3 w-3" /> {t("feed.edit") || "Edit"}
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDelete(post.id)}
+                            className="inline-flex items-center gap-1 text-[11px] text-destructive hover:underline"
+                          >
+                            <Trash2 className="h-3 w-3" /> {t("feed.delete") || "Delete"}
+                          </button>
+                        </span>
                       ) : (
                         <button
                           onClick={() => handleReport(post.id)}

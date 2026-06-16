@@ -489,7 +489,9 @@
     "empty": "No posts yet. Be the first to share.",
     "visPublic": "Everyone",
     "visFriends": "Friends only",
-    "visPrivate": "Only me"
+    "visPrivate": "Only me",
+    "edit": "Edit",
+    "edited": "Updated"
   },
   "admin": {
     "reports": "Reports",
