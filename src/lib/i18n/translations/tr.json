@@ -477,10 +477,28 @@
     "deleted": "Silindi",
     "deleteError": "Silinemedi",
     "delete": "Sil",
+    "report": "Şikayet et",
+    "reported": "Bildirildi. Teşekkürler — ekibimiz inceleyecek.",
     "empty": "Henüz paylaşım yok. İlk paylaşan sen ol.",
     "visPublic": "Herkes",
     "visFriends": "Sadece arkadaşlar",
     "visPrivate": "Sadece ben"
+  },
+  "admin": {
+    "reports": "Şikayetler",
+    "noReports": "Şikayet yok. Akış sakin 🌿",
+    "reportedBy": "Şikayet eden",
+    "postBy": "Paylaşan",
+    "hidden": "gizli",
+    "postRemoved": "(paylaşım kaldırıldı)",
+    "hide": "Gizle",
+    "unhide": "Göster",
+    "deletePost": "Paylaşımı sil",
+    "dismiss": "Kapat",
+    "postHidden": "Paylaşım gizlendi",
+    "postShown": "Paylaşım görünür",
+    "postDeleted": "Paylaşım silindi",
+    "reportDismissed": "Şikayet kapatıldı"
   },
   "friends": {
     "title": "Arkadaşlar",

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Shield, Users, Award, Crown, Star, BookOpen, Plus, Pencil, Trash2, X, Check, ShieldCheck, BadgeCheck, ExternalLink } from "lucide-react";
+import { ArrowLeft, Shield, Users, Award, Crown, Star, BookOpen, Plus, Pencil, Trash2, X, Check, ShieldCheck, BadgeCheck, ExternalLink, Flag, EyeOff, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import {
@@ -18,10 +18,15 @@ import {
   getExpertDocUrl,
   approveExpertApplication,
   rejectExpertApplication,
+  getPostReports,
+  setPostHidden,
+  dismissPostReport,
+  deletePost,
   type Profile,
   type Badge,
   type VaultItemDB,
   type ExpertApplication,
+  type PostReport,
 } from "@/lib/auth";
 
 export const Route = createFileRoute("/auth/admin")({
@@ -34,7 +39,7 @@ export const Route = createFileRoute("/auth/admin")({
   component: AdminPage,
 });
 
-type Tab = "users" | "badges" | "vault" | "experts";
+type Tab = "users" | "badges" | "vault" | "experts" | "reports";
 
 function AdminPage() {
   const t = useT();
@@ -42,6 +47,7 @@ function AdminPage() {
   const [badges, setBadges] = useState<Badge[]>([]);
   const [vaultItems, setVaultItems] = useState<VaultItemDB[]>([]);
   const [expertApps, setExpertApps] = useState<ExpertApplication[]>([]);
+  const [postReports, setPostReports] = useState<PostReport[]>([]);
   const [tab, setTab] = useState<Tab>("users");
   const [isAdmin, setIsAdmin] = useState(false);
   const [showVaultForm, setShowVaultForm] = useState(false);
@@ -70,16 +76,59 @@ function AdminPage() {
   }, []);
 
   async function loadData() {
-    const [u, b, v, e] = await Promise.all([
+    const [u, b, v, e, r] = await Promise.all([
       getAllUsers(),
       getAllBadges(),
       getVaultItems(),
       getExpertApplications(),
+      getPostReports(),
     ]);
     setUsers(u);
     setBadges(b);
     setVaultItems(v);
     setExpertApps(e);
+    setPostReports(r);
+  }
+
+  async function handleToggleHidden(report: PostReport) {
+    if (!report.posts) return;
+    const next = !report.posts.is_hidden;
+    try {
+      await setPostHidden(report.post_id, next);
+      setPostReports((prev) =>
+        prev.map((r) =>
+          r.post_id === report.post_id && r.posts
+            ? { ...r, posts: { ...r.posts, is_hidden: next } }
+            : r
+        )
+      );
+      toast.success(next ? t("admin.postHidden") || "Post hidden" : t("admin.postShown") || "Post visible");
+    } catch (e) {
+      console.error(e);
+      toast.error(t("common.error") || "Something went wrong");
+    }
+  }
+
+  async function handleDeleteReportedPost(report: PostReport) {
+    try {
+      await deletePost(report.post_id);
+      setPostReports((prev) => prev.filter((r) => r.post_id !== report.post_id));
+      toast.success(t("admin.postDeleted") || "Post deleted");
+    } catch (e) {
+      console.error(e);
+      toast.error(t("common.error") || "Something went wrong");
+    }
+  }
+
+  async function handleDismissReport(reportId: string) {
+    try {
+      await dismissPostReport(reportId);
+      setPostReports((prev) => prev.filter((r) => r.id !== reportId));
+      toast.success(t("admin.reportDismissed") || "Report dismissed");
+    } catch (e) {
+      console.error(e);
+      toast.error(t("common.error") || "Something went wrong");
+    }
   }
 
   async function handleViewExpertDoc(path: string) {
@@ -266,6 +315,21 @@ function AdminPage() {
           {expertApps.some((a) => a.status === "pending") && (
             <span className="ml-1 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-[10px] text-accent-foreground">
               {expertApps.filter((a) => a.status === "pending").length}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => setTab("reports")}
+          className={`flex items-center gap-2 rounded-xl px-5 py-3 text-sm transition-colors ${
+            tab === "reports"
+              ? "bg-primary text-primary-foreground"
+              : "border border-border bg-card text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Flag className="h-4 w-4" /> {t("admin.reports") || "Reports"}
+          {postReports.length > 0 && (
+            <span className="ml-1 grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1 text-[10px] text-destructive-foreground">
+              {postReports.length}
             </span>
           )}
         </button>
@@ -557,6 +621,77 @@ function AdminPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Reports Tab */}
+      {tab === "reports" && (
+        <div className="mt-4 space-y-3">
+          {postReports.length === 0 ? (
+            <p className="rounded-xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">
+              {t("admin.noReports") || "No reports. The feed is calm 🌿"}
+            </p>
+          ) : (
+            postReports.map((r) => (
+              <div key={r.id} className="rounded-xl border border-border bg-card p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-muted-foreground">
+                      {t("admin.reportedBy") || "Reported by"}{" "}
+                      <span className="font-medium text-foreground">
+                        {r.reporter?.full_name || r.reporter?.username || "—"}
+                      </span>{" "}
+                      · {new Date(r.created_at).toLocaleString()}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {t("admin.postBy") || "Post by"}{" "}
+                      <span className="text-foreground">
+                        {r.posts?.profiles?.full_name || r.posts?.profiles?.username || "—"}
+                      </span>
+                      {r.posts?.is_hidden && (
+                        <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground">
+                          {t("admin.hidden") || "hidden"}
+                        </span>
+                      )}
+                    </p>
+                    <p className="mt-2 whitespace-pre-wrap break-words rounded-lg bg-secondary/40 p-3 text-sm text-foreground">
+                      {r.posts?.content || t("admin.postRemoved") || "(post removed)"}
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {r.posts && (
+                    <button
+                      onClick={() => handleToggleHidden(r)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs hover:bg-secondary/40"
+                    >
+                      {r.posts.is_hidden ? (
+                        <>
+                          <Eye className="h-3.5 w-3.5" /> {t("admin.unhide") || "Unhide"}
+                        </>
+                      ) : (
+                        <>
+                          <EyeOff className="h-3.5 w-3.5" /> {t("admin.hide") || "Hide"}
+                        </>
+                      )}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDeleteReportedPost(r)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> {t("admin.deletePost") || "Delete post"}
+                  </button>
+                  <button
+                    onClick={() => handleDismissReport(r.id)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:bg-secondary/40"
+                  >
+                    <Check className="h-3.5 w-3.5" /> {t("admin.dismiss") || "Dismiss"}
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       )}
     </div>

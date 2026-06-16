@@ -480,10 +480,28 @@
     "deleted": "Deleted",
     "deleteError": "Could not delete",
     "delete": "Delete",
+    "report": "Report",
+    "reported": "Reported. Thank you — our team will review it.",
     "empty": "No posts yet. Be the first to share.",
     "visPublic": "Everyone",
     "visFriends": "Friends only",
     "visPrivate": "Only me"
+  },
+  "admin": {
+    "reports": "Reports",
+    "noReports": "No reports. The feed is calm 🌿",
+    "reportedBy": "Reported by",
+    "postBy": "Post by",
+    "hidden": "hidden",
+    "postRemoved": "(post removed)",
+    "hide": "Hide",
+    "unhide": "Unhide",
+    "deletePost": "Delete post",
+    "dismiss": "Dismiss",
+    "postHidden": "Post hidden",
+    "postShown": "Post visible",
+    "postDeleted": "Post deleted",
+    "reportDismissed": "Report dismissed"
   },
   "friends": {
     "title": "Friends",

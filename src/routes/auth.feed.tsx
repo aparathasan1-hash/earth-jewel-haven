@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Send, Loader2, Trash2, Globe, Users, Lock, User } from "lucide-react";
+import { ArrowLeft, Send, Loader2, Trash2, Globe, Users, Lock, User, Flag } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase";
@@ -9,6 +9,7 @@ import {
   getFeed,
   createPost,
   deletePost,
+  reportPost,
   type Post,
   type PostVisibility,
 } from "@/lib/auth";
@@ -100,6 +101,17 @@ function FeedPage() {
     } catch (err) {
       console.error("❌ Delete error:", err);
       toast.error(t("feed.deleteError") || "Could not delete");
+    }
+  }
+
+  async function handleReport(postId: string) {
+    if (!userId) return;
+    try {
+      await reportPost(postId, userId, "");
+      toast.success(t("feed.reported") || "Reported. Thank you — our team will review it.");
+    } catch (err) {
+      console.error("❌ Report error:", err);
+      toast.error(t("common.error") || "Something went wrong");
     }
   }
 
@@ -202,12 +214,20 @@ function FeedPage() {
                       <time className="text-[11px] text-muted-foreground">
                         {new Date(post.created_at).toLocaleString()}
                       </time>
-                      {isOwn && (
+                      {isOwn ? (
                         <button
                           onClick={() => handleDelete(post.id)}
                           className="inline-flex items-center gap-1 text-[11px] text-destructive hover:underline"
                         >
                           <Trash2 className="h-3 w-3" /> {t("feed.delete") || "Delete"}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleReport(post.id)}
+                          className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-destructive"
+                          title={t("feed.report") || "Report"}
+                        >
+                          <Flag className="h-3 w-3" /> {t("feed.report") || "Report"}
                         </button>
                       )}
                     </div>

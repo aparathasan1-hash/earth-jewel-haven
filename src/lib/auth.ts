@@ -1624,6 +1624,7 @@ export type Post = {
   content: string;
   image_url: string | null;
   visibility: PostVisibility;
+  is_hidden: boolean;
   created_at: string;
   updated_at: string;
   profiles?: { username: string | null; full_name: string | null; avatar_url: string | null };
@@ -1673,6 +1674,59 @@ export async function updatePost(postId: string, updates: Partial<Pick<Post, "co
 
 export async function deletePost(postId: string) {
   const { error } = await supabase.from("posts").delete().eq("id", postId);
+  if (error) throw error;
+}
+
+// --- Feed Moderasyonu ---
+
+export type PostReport = {
+  id: string;
+  post_id: string;
+  reporter_id: string;
+  reason: string | null;
+  created_at: string;
+  posts?: {
+    id: string;
+    content: string;
+    user_id: string;
+    is_hidden: boolean;
+    profiles?: { username: string | null; full_name: string | null } | null;
+  } | null;
+  reporter?: { username: string | null; full_name: string | null } | null;
+};
+
+// Kullanıcı bir paylaşımı raporlar (post başına bir kez — UNIQUE).
+export async function reportPost(postId: string, reporterId: string, reason: string) {
+  const { error } = await supabase
+    .from("post_reports")
+    .insert({ post_id: postId, reporter_id: reporterId, reason });
+  if (error && error.code !== "23505") throw error; // 23505: zaten raporlanmış
+}
+
+// Admin: bekleyen raporlar (paylaşım + rapor eden bilgisiyle).
+export async function getPostReports(): Promise<PostReport[]> {
+  const { data, error } = await supabase
+    .from("post_reports")
+    .select(
+      "*, posts(id, content, user_id, is_hidden, profiles(username, full_name)), reporter:reporter_id(username, full_name)"
+    )
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data as unknown as PostReport[]) ?? [];
+}
+
+// Admin: paylaşımı gizle/aç (RLS admin update politikası).
+export async function setPostHidden(postId: string, hidden: boolean) {
+  const { error } = await supabase
+    .from("posts")
+    .update({ is_hidden: hidden, updated_at: new Date().toISOString() })
+    .eq("id", postId);
+  if (error) throw error;
+}
+
+// Admin: bir raporu çöz (kapat/sil).
+export async function dismissPostReport(reportId: string) {
+  const { error } = await supabase.from("post_reports").delete().eq("id", reportId);
   if (error) throw error;
 }
 
