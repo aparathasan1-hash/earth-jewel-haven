@@ -572,7 +572,15 @@
     "codeLabel": "Kodun",
     "joined": "Senin davetinle katılanlar",
     "empty": "Henüz kimse yok. Linkini paylaş, ilk anneyi karşıla.",
-    "aMother": "Bir anne"
+    "aMother": "Bir anne",
+    "rewards": "Ödüller",
+    "invitesLabel": "davet",
+    "nextAt": "Sonraki ödül",
+    "badge": {
+      "first_invite": "İlk filiz",
+      "village_builder": "Köy kurucusu",
+      "village_founder": "Köyün kurucusu"
+    }
   },
   "dm": {
     "title": "Mesajlar",

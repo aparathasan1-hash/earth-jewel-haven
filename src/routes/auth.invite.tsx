@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Loader2, Gift, Copy, Check, Share2, User } from "lucide-react";
+import { ArrowLeft, Loader2, Gift, Copy, Check, Share2, User, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import {
@@ -145,6 +145,63 @@ function InvitePage() {
           <span className="font-mono font-medium text-foreground">{code}</span>
         </p>
       </div>
+
+      {/* Ödül kilometre taşları */}
+      <section className="mt-8">
+        <h2 className="mb-3 text-sm font-medium text-muted-foreground">
+          {t("invite.rewards") || "Rewards"}
+        </h2>
+        {(() => {
+          const count = referrals.length;
+          const milestones = [
+            { n: 1, key: "first_invite", icon: "🌱" },
+            { n: 3, key: "village_builder", icon: "🏡" },
+            { n: 5, key: "village_founder", icon: "🌟" },
+          ];
+          const next = milestones.find((m) => count < m.n);
+          const pct = next ? Math.min(100, Math.round((count / next.n) * 100)) : 100;
+          return (
+            <div className="rounded-2xl border border-border bg-card p-5">
+              {/* İlerleme */}
+              <div className="mb-4">
+                <div className="mb-1.5 flex items-center justify-between text-xs text-muted-foreground">
+                  <span>
+                    {count} {t("invite.invitesLabel") || "invites"}
+                  </span>
+                  {next && (
+                    <span>
+                      {t("invite.nextAt") || "Next reward at"} {next.n}
+                    </span>
+                  )}
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
+                  <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+              {/* Rozetler */}
+              <div className="grid grid-cols-3 gap-2">
+                {milestones.map((m) => {
+                  const earned = count >= m.n;
+                  return (
+                    <div
+                      key={m.key}
+                      className={`flex flex-col items-center gap-1 rounded-xl border p-3 text-center transition-colors ${
+                        earned ? "border-accent/40 bg-accent/5" : "border-border opacity-60"
+                      }`}
+                    >
+                      <span className="text-2xl">{earned ? m.icon : <Lock className="h-5 w-5 text-muted-foreground" />}</span>
+                      <span className="text-[11px] font-medium leading-tight">
+                        {t(`invite.badge.${m.key}`) || m.key}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">{m.n}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+      </section>
 
       {/* Invited list */}
       <section className="mt-8">

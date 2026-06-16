@@ -575,7 +575,15 @@
     "codeLabel": "Your code",
     "joined": "Joined through you",
     "empty": "No one yet. Share your link to welcome the first mother.",
-    "aMother": "A mother"
+    "aMother": "A mother",
+    "rewards": "Rewards",
+    "invitesLabel": "invites",
+    "nextAt": "Next reward at",
+    "badge": {
+      "first_invite": "First sprout",
+      "village_builder": "Village builder",
+      "village_founder": "Village founder"
+    }
   },
   "dm": {
     "title": "Messages",
